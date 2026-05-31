@@ -1,0 +1,158 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 20;
+}
+
+.headerCenter {
+  flex: 1;
+  text-align: center;
+}
+
+.noteTitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  cursor: text;
+  transition: color 0.15s;
+}
+
+.noteTitle:hover {
+  color: var(--text);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerBtn {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.headerBtn:hover, .activeBtn {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.styleSelect {
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.editorWrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 48px 24px 80px;
+}
+
+.editor {
+  width: 100%;
+  max-width: 640px;
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+/* TipTap editor styles */
+.editor :global(.ProseMirror) {
+  outline: none;
+  min-height: 60vh;
+  color: var(--text);
+}
+
+.editor :global(.ProseMirror p.is-editor-empty:first-child::before) {
+  color: var(--text-placeholder);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.editor :global(.ProseMirror h1) { font-size: 1.8em; font-weight: 700; margin: 1.4em 0 0.4em; letter-spacing: -0.02em; }
+.editor :global(.ProseMirror h2) { font-size: 1.4em; font-weight: 700; margin: 1.3em 0 0.3em; }
+.editor :global(.ProseMirror h3) { font-size: 1.15em; font-weight: 600; margin: 1.1em 0 0.2em; }
+.editor :global(.ProseMirror p) { margin-bottom: 0.8em; }
+.editor :global(.ProseMirror blockquote) {
+  border-left: 2px solid var(--border-strong);
+  padding-left: 1.2em;
+  margin: 1.2em 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.editor :global(.ProseMirror ul),
+.editor :global(.ProseMirror ol) { padding-left: 1.4em; margin-bottom: 0.8em; }
+.editor :global(.ProseMirror li) { margin-bottom: 0.2em; }
+.editor :global(.ProseMirror hr) { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+.focus .header, .focus .toolbar {
+  display: none;
+}
+
+.exitFocus {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  z-index: 50;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--bg);
+  transition: color 0.15s;
+}
+
+.exitFocus:hover { color: var(--text); }
+
+.exportMenu {
+  position: fixed;
+  top: 88px;
+  right: 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.exportMenu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+  color: var(--text);
+}
+
+.exportMenu button:hover {
+  background: var(--bg-secondary);
+}

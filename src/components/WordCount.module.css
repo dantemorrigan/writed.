@@ -1,0 +1,10 @@
+.counter {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  user-select: none;
+}

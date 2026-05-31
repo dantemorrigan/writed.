@@ -1,0 +1,28 @@
+.page {
+  background: var(--bg);
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 60px 24px;
+}
+
+.content {
+  width: 100%;
+  max-width: 640px;
+  color: var(--text);
+}
+
+.content h1 { font-size: 2em; margin: 1.5em 0 0.5em; }
+.content h2 { font-size: 1.5em; margin: 1.4em 0 0.4em; }
+.content h3 { font-size: 1.2em; margin: 1.2em 0 0.3em; }
+.content p { margin-bottom: 1em; }
+.content blockquote {
+  border-left: 2px solid var(--border-strong);
+  padding-left: 1.2em;
+  margin: 1.2em 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.content ul, .content ol { padding-left: 1.5em; margin-bottom: 1em; }
+.content li { margin-bottom: 0.3em; }
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }

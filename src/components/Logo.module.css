@@ -1,0 +1,16 @@
+.logo {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  text-decoration: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  user-select: none;
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+.sm { font-size: 1rem; }
+.md { font-size: 1.25rem; }
+.lg { font-size: 1.75rem; }
