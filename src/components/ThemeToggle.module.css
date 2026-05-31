@@ -1,0 +1,13 @@
+.btn {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.btn:hover {
+  color: var(--text);
+  background: var(--bg-secondary);
+}

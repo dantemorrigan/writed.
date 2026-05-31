@@ -1,0 +1,142 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.back {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.back:hover { color: var(--text); }
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: text;
+  letter-spacing: -0.02em;
+}
+
+.title:hover {
+  opacity: 0.7;
+}
+
+.renameForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.renameInput {
+  font-size: 1.4rem;
+  font-weight: 700;
+  border: none;
+  border-bottom: 2px solid var(--text);
+  background: transparent;
+  padding: 4px 0;
+  flex: 1;
+}
+
+.renameOk, .renameCancel {
+  font-size: 1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.statusBtn {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+
+.statusBtn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.stats {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.addBtn {
+  padding: 10px 18px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.addBtn:hover { opacity: 0.8; }
+
+.chapters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chapterRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.chapterNum {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  padding-top: 18px;
+  min-width: 20px;
+  text-align: right;
+}
+
+.chapterCard {
+  flex: 1;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 40px 0;
+  text-align: center;
+}
