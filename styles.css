@@ -22,7 +22,7 @@
   --dur: .5s;
 
   --maxw: 1320px;
-  --measure: 66ch;       /* iA-Writer column */
+  --measure: 80ch;       /* A4-ish writing column */
 
   /* radius scale — fluent / soft (Google · Figma) */
   --r-sm: 8px;
