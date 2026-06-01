@@ -211,7 +211,9 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
               ))}
             </div>
             <div className="ed-tools-grp ed-tools-modes">
-              <button className={"tool" + (focusMode?" on":"")} title="Фокус" onClick={() => setFocusMode((f)=>!f)}><Icon name="focus" size={19} /></button>
+              <button className={"tool tool--focusdot" + (focusMode?" on":"")} title="Фокус" onClick={() => setFocusMode((f)=>!f)}>
+                <span className={"brand-dot-btn" + (focusMode?" active":"")} />
+              </button>
             </div>
           </aside>
         )}

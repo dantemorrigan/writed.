@@ -211,6 +211,19 @@
 .tool--font.on { color: var(--accent); background: var(--accent-tint); font-weight: 600; }
 .ed-tools-fonts { margin-top: auto; }
 
+/* focus dot button */
+.brand-dot-btn {
+  display: block; width: 9px; height: 9px; border-radius: 2px;
+  background: var(--ink-faint);
+  transition: background .25s var(--ease), border-radius .3s var(--ease), box-shadow .25s var(--ease);
+}
+.tool--focusdot:hover .brand-dot-btn { background: var(--ink-soft); border-radius: 50%; }
+.brand-dot-btn.active {
+  background: var(--accent); border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--accent-tint);
+  animation: pulse 2.4s var(--ease-in-out) infinite;
+}
+
 .ed-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
 .sheet { max-width: calc(var(--measure) + 120px); margin: 48px auto; background: var(--sheet);
   padding: 80px 60px; box-shadow: var(--sheet-shadow); position: relative; min-height: 60vh;
@@ -341,6 +354,31 @@
 .prof-input:focus { border-color: var(--accent); }
 .prof-note { font-size: var(--t-xs); color: var(--ink-soft); margin: 16px 0 18px; max-width: 60ch; line-height: 1.6; }
 .prof-data { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- stats dot popup ---------- */
+.stats-dot-wrap { position: relative; display: inline-flex; }
+.stats-popup {
+  position: absolute; top: calc(100% + 16px); left: -8px; z-index: 50;
+  background: var(--sheet); border: 1px solid var(--line);
+  box-shadow: var(--sheet-shadow); padding: 20px 22px; min-width: 210px;
+  animation: dotExpand .32s var(--ease-out) both;
+  transform-origin: top left;
+}
+.stats-popup::before {
+  content: ""; position: absolute; top: -6px; left: 14px;
+  width: 10px; height: 10px; background: var(--sheet);
+  border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+@keyframes dotExpand {
+  from { opacity: 0; transform: scale(.2); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.stats-popup-label { font-size: var(--t-xs); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 14px; }
+.stats-popup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+.stats-popup-n { font-size: var(--t-lg); font-weight: 500; letter-spacing: -.02em; color: var(--ink); line-height: 1; }
+.stats-popup-l { font-size: var(--t-xs); color: var(--ink-soft); letter-spacing: .04em; margin-top: 4px; }
 
 /* ---------- toast ---------- */
 .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 80;

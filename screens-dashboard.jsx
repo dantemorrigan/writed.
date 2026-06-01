@@ -2,11 +2,11 @@
    Writed. — Dashboard + Project (folder) view
    ============================================================ */
 
-function TopBar({ user, nav, onTheme, right }) {
+function TopBar({ user, store, nav, onTheme, right }) {
   return (
     <header className="topbar">
       <div className="topbar-l">
-        <Logo size={19} alive onClick={() => nav.dashboard()} />
+        <StatsDot store={store} nav={nav} />
       </div>
       <div className="topbar-c"></div>
       <div className="topbar-r">
@@ -65,7 +65,7 @@ function Dashboard({ store, user, nav, onTheme }) {
 
   return (
     <div className="app-shell screen-enter">
-      <TopBar user={user} nav={nav} onTheme={onTheme} />
+      <TopBar user={user} store={store} nav={nav} onTheme={onTheme} />
       <div className="scroll-area">
         <div className="wrap">
 
@@ -217,7 +217,7 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
   const [deleteChap, setDeleteChap] = useState(null); // {id, title}
   const [deleteProject, setDeleteProject] = useState(false);
 
-  if (!p) { return <div className="app-shell"><TopBar user={user} nav={nav} onTheme={onTheme} /><div className="empty mono">Проект не найден</div></div>; }
+  if (!p) { return <div className="app-shell"><TopBar user={user} store={store} nav={nav} onTheme={onTheme} /><div className="empty mono">Проект не найден</div></div>; }
 
   const words = store.projectWords(p);
   const goal = Math.max(3000, Math.ceil(words / 5000) * 5000 + 5000);
@@ -244,7 +244,7 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
 
   return (
     <div className="app-shell screen-enter">
-      <TopBar user={user} nav={nav} onTheme={onTheme}
+      <TopBar user={user} store={store} nav={nav} onTheme={onTheme}
         right={<button className="btn btn--ghost" onClick={() => nav.export(p.id)}><Icon name="book" size={16} /> Собрать книгу</button>} />
       <div className="scroll-area">
         <div className="wrap">
