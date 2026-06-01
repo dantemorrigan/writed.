@@ -1,0 +1,237 @@
+/* ============================================================
+   Writed. — Dashboard + Project (folder) view
+   ============================================================ */
+
+function TopBar({ user, nav, onTheme, right }) {
+  return (
+    <header className="topbar">
+      <div className="topbar-l">
+        <Logo size={19} alive onClick={() => nav.dashboard()} />
+      </div>
+      <div className="topbar-c"></div>
+      <div className="topbar-r">
+        {right}
+        <button className="user-chip" onClick={() => nav.profile()} title="Профиль">
+          <span className="user-ava mono">{(user.name || "А").trim().charAt(0).toUpperCase()}</span>
+          <span className="user-name">{user.name || "Автор"}</span>
+        </button>
+        <ThemeToggle theme={user.theme} onChange={onTheme} />
+      </div>
+    </header>
+  );
+}
+
+function Dashboard({ store, user, nav, onTheme }) {
+  const [filter, setFilter] = useState("all");
+  const s = store.get();
+  const stats = store.stats();
+
+  const projects = s.projects.filter((p) => filter === "all" ? true : p.status === (filter === "done" ? "done" : "draft"));
+  const notes = filter === "done" ? [] : s.notes;
+
+  const hour = new Date().getHours();
+  const greet = hour < 5 ? "Доброй ночи" : hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
+
+  return (
+    <div className="app-shell screen-enter">
+      <TopBar user={user} nav={nav} onTheme={onTheme} />
+      <div className="scroll-area">
+        <div className="wrap">
+
+          <section className="dash-hero">
+            <div>
+              <div className="eyebrow">{greet}, {user.name || "Автор"}</div>
+              <h1 className="dash-title">Что напишем<br />сегодня<span style={{ color: "var(--accent)" }}>?</span></h1>
+            </div>
+            <div className="dash-stat">
+              <div className="dash-stat-num mono">{stats.words.toLocaleString("ru-RU")}</div>
+              <div className="dash-stat-lbl mono">слов всего · {stats.projects} {plural(stats.projects,"проект","проекта","проектов")} · {stats.notes} {plural(stats.notes,"заметка","заметки","заметок")}</div>
+            </div>
+          </section>
+
+          <div className="dash-actions">
+            <button className="bigaction" onClick={() => nav.createProject()}>
+              <Icon name="folder" size={22} />
+              <div><span className="bigaction-t">Новый проект</span><span className="bigaction-s mono">книга · главы</span></div>
+              <Icon name="plus" size={18} className="bigaction-plus" />
+            </button>
+            <button className="bigaction" onClick={() => nav.createNote()}>
+              <Icon name="note" size={22} />
+              <div><span className="bigaction-t">Новая заметка</span><span className="bigaction-s mono">одиночный лист</span></div>
+              <Icon name="plus" size={18} className="bigaction-plus" />
+            </button>
+          </div>
+
+          <div className="dash-filter">
+            <div className="seg">
+              {[["all","Всё"],["draft","Черновики"],["done","Завершённые"]].map(([k,l]) => (
+                <button key={k} className={"seg-btn" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>{l}</button>
+              ))}
+            </div>
+          </div>
+
+          {projects.length > 0 && (
+            <section className="dash-section">
+              <div className="section-head"><span className="eyebrow">Проекты</span><span className="rule-thin section-rule" /></div>
+              <div className="card-grid">
+                {projects.map((p, i) => <ProjectCard key={p.id} p={p} store={store} nav={nav} idx={i} />)}
+              </div>
+            </section>
+          )}
+
+          {notes.length > 0 && (
+            <section className="dash-section">
+              <div className="section-head"><span className="eyebrow">Заметки</span><span className="rule-thin section-rule" /></div>
+              <div className="card-grid">
+                {notes.map((n, i) => <NoteCard key={n.id} n={n} nav={nav} idx={i} />)}
+              </div>
+            </section>
+          )}
+
+          {!projects.length && !notes.length && (
+            <div className="empty mono">Здесь пока пусто. Начните с нового проекта.</div>
+          )}
+
+          <footer className="dash-foot mono">
+            хранится локально на этом устройстве · <Icon name="check" size={13} style={{display:"inline",verticalAlign:"-2px"}} /> persistent storage
+          </footer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressBar({ value, max, accent }) {
+  const pct = max ? Math.min(100, Math.round((value / max) * 100)) : 0;
+  return <div className="pbar"><span style={{ width: pct + "%", background: accent ? "var(--accent)" : "var(--ink)" }} /></div>;
+}
+
+function ProjectCard({ p, store, nav, idx }) {
+  const words = store.projectWords(p);
+  const goal = Math.max(2000, Math.ceil(words / 1000) * 1000 + 1000);
+  return (
+    <button className="card card--project fade-up" style={{ animationDelay: idx * 60 + "ms" }} onClick={() => nav.project(p.id)}>
+      <div className="card-top">
+        <Icon name="folder" size={18} />
+        <span className={"chip mono " + (p.status === "done" ? "chip--done" : "chip--draft")}>
+          {p.status === "done" ? "завершён" : "черновик"}
+        </span>
+      </div>
+      <h3 className="card-title">{p.title}</h3>
+      {p.synopsis && <p className="card-syn">{p.synopsis}</p>}
+      <div className="card-bottom">
+        <div className="card-meta mono">
+          <span>{p.chapters.length} {plural(p.chapters.length,"глава","главы","глав")}</span>
+          <span className="dotsep">·</span>
+          <span>{words.toLocaleString("ru-RU")} слов</span>
+        </div>
+        <ProgressBar value={words} max={goal} accent={p.status==="done"} />
+        <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(p.updatedAt)}</div>
+      </div>
+    </button>
+  );
+}
+
+function NoteCard({ n, nav, idx }) {
+  const text = (n.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return (
+    <button className="card card--note fade-up" style={{ animationDelay: idx * 60 + "ms" }} onClick={() => nav.doc(n.id)}>
+      <div className="card-top"><Icon name="note" size={18} /></div>
+      <h3 className="card-title card-title--note">{n.title}</h3>
+      <p className="card-syn card-syn--note">{text || "пустая заметка"}</p>
+      <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(n.updatedAt)}</div>
+    </button>
+  );
+}
+
+/* ----------------------- PROJECT (folder) ----------------------- */
+function ProjectView({ store, user, nav, onTheme, projectId }) {
+  const s = store.get();
+  const p = s.projects.find((x) => x.id === projectId);
+  const [dragId, setDragId] = useState(null);
+  const [overId, setOverId] = useState(null);
+  const [editTitle, setEditTitle] = useState(false);
+  if (!p) { return <div className="app-shell"><TopBar user={user} nav={nav} onTheme={onTheme} /><div className="empty mono">Проект не найден</div></div>; }
+
+  const words = store.projectWords(p);
+  const goal = Math.max(3000, Math.ceil(words / 5000) * 5000 + 5000);
+
+  function onDrop(targetId) {
+    if (!dragId || dragId === targetId) { setDragId(null); setOverId(null); return; }
+    const ids = p.chapters.map((c) => c.id);
+    const from = ids.indexOf(dragId), to = ids.indexOf(targetId);
+    ids.splice(to, 0, ids.splice(from, 1)[0]);
+    store.reorderChapters(p.id, ids);
+    setDragId(null); setOverId(null);
+  }
+
+  return (
+    <div className="app-shell screen-enter">
+      <TopBar user={user} nav={nav} onTheme={onTheme}
+        right={<button className="btn btn--ghost" onClick={() => nav.export(p.id)}><Icon name="book" size={16} /> Собрать книгу</button>} />
+      <div className="scroll-area">
+        <div className="wrap">
+          <button className="backlink mono" onClick={() => nav.dashboard()}><Icon name="back" size={14} /> все работы</button>
+
+          <section className="proj-hero">
+            <div className="proj-hero-main">
+              <div className="eyebrow">Проект · {p.status === "done" ? "завершён" : "черновик"}</div>
+              {editTitle ? (
+                <input className="proj-title-input" autoFocus defaultValue={p.title}
+                  onBlur={(e) => { store.updateProject(p.id, { title: e.target.value.trim() || p.title }); setEditTitle(false); }}
+                  onKeyDown={(e) => e.key === "Enter" && e.target.blur()} />
+              ) : (
+                <h1 className="proj-title" onClick={() => setEditTitle(true)} title="Нажмите, чтобы переименовать">{p.title}</h1>
+              )}
+              {p.synopsis
+                ? <p className="proj-syn" onClick={() => { const v = prompt("Синопсис", p.synopsis); if (v != null) store.updateProject(p.id, { synopsis: v }); }}>{p.synopsis}</p>
+                : <button className="proj-syn-add mono" onClick={() => { const v = prompt("Синопсис проекта"); if (v) store.updateProject(p.id, { synopsis: v }); }}>+ добавить синопсис</button>}
+            </div>
+            <div className="proj-hero-side">
+              <div className="proj-bignum mono">{words.toLocaleString("ru-RU")}</div>
+              <div className="proj-bignum-lbl mono">слов · цель {goal.toLocaleString("ru-RU")}</div>
+              <ProgressBar value={words} max={goal} accent={p.status==="done"} />
+              <button className={"status-toggle mono" + (p.status==="done"?" on":"")}
+                onClick={() => store.updateProject(p.id, { status: p.status === "done" ? "draft" : "done" })}>
+                <Icon name="check" size={14} /> {p.status === "done" ? "завершён" : "отметить завершённым"}
+              </button>
+            </div>
+          </section>
+
+          <div className="section-head"><span className="eyebrow">Главы</span><span className="rule-thin section-rule" />
+            <button className="addchap mono" onClick={() => { const id = store.addChapter(p.id); nav.doc(id); }}><Icon name="plus" size={14} /> Добавить главу</button>
+          </div>
+
+          <ol className="chap-list">
+            {p.chapters.map((c, i) => {
+              const cw = store.countWords(c.content);
+              return (
+                <li key={c.id} draggable
+                  className={"chap" + (dragId === c.id ? " dragging" : "") + (overId === c.id ? " over" : "")}
+                  onDragStart={() => setDragId(c.id)}
+                  onDragOver={(e) => { e.preventDefault(); setOverId(c.id); }}
+                  onDragLeave={() => setOverId((o) => o === c.id ? null : o)}
+                  onDrop={() => onDrop(c.id)}
+                  onDragEnd={() => { setDragId(null); setOverId(null); }}
+                  onClick={() => nav.doc(c.id)}>
+                  <span className="chap-grip" onClick={(e)=>e.stopPropagation()}><Icon name="drag" size={16} /></span>
+                  <span className="chap-num mono">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="chap-title">{c.title}</span>
+                  <span className="chap-words mono">{cw.toLocaleString("ru-RU")} слов</span>
+                  <span className="chap-time mono">{timeAgo(c.updatedAt)}</span>
+                  <span className="chap-open"><Icon name="forward" size={16} /></span>
+                </li>
+              );
+            })}
+            {!p.chapters.length && (
+              <li className="chap-empty mono">Ни одной главы. <button onClick={() => { const id = store.addChapter(p.id); nav.doc(id); }}>Создайте первую →</button></li>
+            )}
+          </ol>
+          <div style={{ height: 60 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { TopBar, Dashboard, ProjectView, ProgressBar });
