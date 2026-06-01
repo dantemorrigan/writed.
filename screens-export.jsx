@@ -3,14 +3,84 @@
    ============================================================ */
 
 function BookPreview({ html, title, edition }) {
+  const scrollRef = useRef(null);
+  const contentRef = useRef(null);
+  const [showTop, setShowTop] = useState(false);
+  const [anchorsOpen, setAnchorsOpen] = useState(false);
+
+  const { headings, htmlWithIds } = useMemo(() => {
+    const div = document.createElement("div");
+    div.innerHTML = html || "";
+    const hs = [];
+    let idx = 0;
+    div.querySelectorAll("h1, h2, h3").forEach((el) => {
+      const id = "bh-" + (idx++);
+      el.id = id;
+      hs.push({ id, level: parseInt(el.tagName[1]), text: el.textContent.trim() });
+    });
+    return { headings: hs, htmlWithIds: div.innerHTML };
+  }, [html]);
+
+  const pageCount = useMemo(() => {
+    const div = document.createElement("div");
+    div.innerHTML = html || "";
+    const words = (div.textContent || "").trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 280));
+  }, [html]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setShowTop(el.scrollTop > 320);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  function scrollToTop() {
+    scrollRef.current && scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function scrollToHeading(id) {
+    const target = contentRef.current && contentRef.current.querySelector("#" + id);
+    if (!target || !scrollRef.current) return;
+    const containerTop = scrollRef.current.getBoundingClientRect().top;
+    const targetTop = target.getBoundingClientRect().top;
+    scrollRef.current.scrollBy({ top: targetTop - containerTop - 80, behavior: "smooth" });
+  }
+
   return (
-    <div className="preview-scroll">
+    <div className="preview-scroll" ref={scrollRef}>
+      {headings.length > 0 && (
+        <div className={"preview-anchors" + (anchorsOpen ? " open" : "")}>
+          <button className="anchors-toggle" onClick={() => setAnchorsOpen((o) => !o)}>
+            <Icon name="panel" size={14} />
+            <span>{anchorsOpen ? "Скрыть" : "Содержание"}</span>
+          </button>
+          {anchorsOpen && (
+            <nav className="anchors-nav">
+              {headings.map((h) => (
+                <button key={h.id} className={"anchor-item anchor-item--h" + h.level}
+                  onClick={() => { scrollToHeading(h.id); setAnchorsOpen(false); }}>
+                  {h.text}
+                </button>
+              ))}
+            </nav>
+          )}
+        </div>
+      )}
       <div className={"book book--" + edition}>
         <div className="book-page">
-          <div className="book-content" dangerouslySetInnerHTML={{ __html: html || "<p></p>" }} />
+          <div className="book-content" ref={contentRef} dangerouslySetInnerHTML={{ __html: htmlWithIds }} />
         </div>
-        <div className="book-foot mono">предпросмотр издания</div>
+        <div className="book-foot mono">
+          предпросмотр · ≈&thinsp;{pageCount}&thinsp;{pageCount === 1 ? "стр." : pageCount < 5 ? "стр." : "стр."}
+        </div>
       </div>
+      {showTop && (
+        <button className="scroll-top-btn" onClick={scrollToTop} title="Наверх">
+          <Icon name="chevron" size={18} style={{ transform: "rotate(180deg)" }} />
+        </button>
+      )}
     </div>
   );
 }
@@ -50,6 +120,13 @@ function downloadBlob(name, mime, content) {
 
 const MARGINS = { narrow: "14mm", normal: "22mm", wide: "32mm" };
 const SCREEN_PADS = { narrow: "12px", normal: "28px", wide: "60px" };
+const PAPER = {
+  a4:     { label: "A4",     size: "210mm 297mm", em: "38em" },
+  letter: { label: "Letter", size: "8.5in 11in",  em: "40em" },
+  a5:     { label: "A5",     size: "148mm 210mm", em: "28em" },
+  b5:     { label: "B5",     size: "176mm 250mm", em: "33em" },
+  a6:     { label: "A6",     size: "105mm 148mm", em: "22em" },
+};
 
 function buildBookHTML(project, opts) {
   const chapters = project.chapters.filter((c) => opts.include[c.id] !== false);
@@ -69,7 +146,7 @@ function buildBookHTML(project, opts) {
   return `<!doctype html><html><head><meta charset="utf-8"><title>${project.title}</title>
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Spectral:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <style>
-    @page { margin: ${MARGINS[opts.margin]}; }
+    @page { size: ${(PAPER[opts.paperSize] || PAPER.a4).size}; margin: ${MARGINS[opts.margin]}; }
     * { box-sizing: border-box; }
     body { font-family: ${fontStack}; font-size: 12pt; line-height: ${opts.leading}; color: #1f1d18; background: #fff; margin: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-wrap: break-word; word-break: break-word; }
     .b-kicker { font-family: 'JetBrains Mono', monospace; letter-spacing: .42em; font-size: 9pt; color: #c2542f; text-transform: uppercase; }
@@ -89,7 +166,7 @@ function buildBookHTML(project, opts) {
     /* on-screen preview: a single clean, centred book column */
     @media screen {
       body { padding: 60px 0 80px; }
-      body > section { max-width: 34em; margin: 0 auto; padding: 0 ${SCREEN_PADS[opts.margin]}; }
+      body > section { max-width: ${(PAPER[opts.paperSize] || PAPER.a4).em}; margin: 0 auto; padding: 0 ${SCREEN_PADS[opts.margin]}; }
       .b-title { text-align: center; padding-bottom: 46px; margin-bottom: 46px; border-bottom: ${opts.merge ? "none" : "1px solid #e9e3d5"}; }
       .b-toc { padding-bottom: 40px; margin-bottom: ${opts.merge ? "24px" : "40px"}; border-bottom: ${opts.merge ? "none" : "1px solid #e9e3d5"}; }
       .b-chap + .b-chap { margin-top: ${opts.merge ? "0" : "44px"}; }
@@ -121,6 +198,7 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
   const [opts, setOpts] = useState(() => ({
     merge: false, titlePage: true, toc: true,
     margin: "normal", font: "book", leading: 1.7,
+    paperSize: "a4",
     include: {},
   }));
   const set = (patch) => setOpts((o) => ({ ...o, ...patch }));
@@ -188,6 +266,10 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
 
             <div className="exp-grp">
               <div className="exp-grp-h mono">Вёрстка</div>
+              <div className="exp-row"><span className="exp-lbl">Формат</span>
+                <div className="seg seg--sm">{Object.entries(PAPER).map(([k, p]) => (
+                  <button key={k} className={"seg-btn"+(opts.paperSize===k?" on":"")} onClick={() => set({paperSize:k})}>{p.label}</button>))}</div>
+              </div>
               <div className="exp-row"><span className="exp-lbl">Поля</span>
                 <div className="seg seg--sm">{[["narrow","узкие"],["normal","обычные"],["wide","широкие"]].map(([k,l]) => (
                   <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{l}</button>))}</div>

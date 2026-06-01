@@ -281,9 +281,31 @@
 
 /* ---------- book preview ---------- */
 .preview-scroll { flex: 1; overflow-y: auto; background: var(--paper-2); padding: 44px 20px; }
-.book { max-width: 760px; margin: 0 auto; }
+.book { max-width: 900px; margin: 0 auto; }
 .book-page { background: var(--sheet); box-shadow: var(--sheet-shadow); padding: 92px 88px; min-height: 70vh; color: var(--ink); overflow-wrap: break-word; word-break: break-word; }
 .book-foot { text-align: center; padding: 18px; font-size: var(--t-xs); color: var(--ink-faint); letter-spacing: .12em; text-transform: uppercase; }
+
+/* preview anchors + scroll-to-top */
+.preview-anchors { max-width: 900px; margin: 0 auto 12px; }
+.anchors-toggle { display: inline-flex; align-items: center; gap: 7px; background: var(--sheet);
+  border: 1px solid var(--line); color: var(--ink-2); font-family: var(--ui); font-size: var(--t-xs);
+  padding: 6px 12px; cursor: pointer; letter-spacing: .04em; transition: border-color .2s var(--ease-out), color .2s var(--ease-out); }
+.anchors-toggle:hover { border-color: var(--ink-faint); color: var(--ink); }
+.preview-anchors.open .anchors-toggle { border-color: var(--accent); color: var(--accent); }
+.anchors-nav { margin-top: 4px; background: var(--sheet); border: 1px solid var(--line);
+  padding: 8px 0; display: flex; flex-direction: column; }
+.anchor-item { text-align: left; background: none; border: none; cursor: pointer; font-family: var(--ui);
+  font-size: var(--t-sm); color: var(--ink-2); padding: 7px 16px; transition: color .15s var(--ease-out), background .15s var(--ease-out); }
+.anchor-item:hover { color: var(--ink); background: var(--paper-2); }
+.anchor-item--h1 { font-weight: 600; }
+.anchor-item--h2 { padding-left: 28px; }
+.anchor-item--h3 { padding-left: 40px; font-size: var(--t-xs); color: var(--ink-soft); }
+
+.scroll-top-btn { position: sticky; bottom: 28px; float: right; margin-right: 8px;
+  width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+  background: var(--sheet); border: 1px solid var(--line); color: var(--ink-2); cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,.14); transition: color .2s var(--ease-out), border-color .2s var(--ease-out); }
+.scroll-top-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
 .book-content { color: var(--ink); }
 .book-content h1 { margin: 0 0 1em; }
 .book-content p { margin: 0 0 .3em; }
@@ -645,6 +667,9 @@
 
 /* ---- book preview page (soft sheet, paper feel kept) ---- */
 .book-page { border-radius: var(--r-md); }
+.anchors-toggle { border-radius: var(--r-pill); }
+.anchors-nav { border-radius: var(--r-md); }
+.scroll-top-btn { border-radius: 50%; }
 
 /* ---- profile ---- */
 .prof-ava-wrap { border-radius: var(--r-md); overflow: hidden; }
