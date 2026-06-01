@@ -152,15 +152,15 @@ function ProjectCard({ p, store, nav, idx, onDelete }) {
   const goal = Math.max(2000, Math.ceil(words / 1000) * 1000 + 1000);
   return (
     <div className="card card--project fade-up" style={{ animationDelay: idx * 60 + "ms" }}>
-      <button className="card-delete" title="Удалить проект" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-        <Icon name="trash" size={15} />
-      </button>
       <button className="card-inner" onClick={() => nav.project(p.id)}>
         <div className="card-top">
           <Icon name="folder" size={18} />
           <span className={"chip mono " + (p.status === "done" ? "chip--done" : "chip--draft")}>
             {p.status === "done" ? "завершён" : "черновик"}
           </span>
+          <button className="card-delete" title="Удалить проект" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+            <Icon name="trash" size={15} />
+          </button>
         </div>
         <h3 className="card-title">{p.title}</h3>
         {p.synopsis && <p className="card-syn">{p.synopsis}</p>}
@@ -182,11 +182,13 @@ function NoteCard({ n, nav, idx, onDelete }) {
   const text = (n.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   return (
     <div className="card card--note fade-up" style={{ animationDelay: idx * 60 + "ms" }}>
-      <button className="card-delete" title="Удалить заметку" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-        <Icon name="trash" size={15} />
-      </button>
       <button className="card-inner" onClick={() => nav.doc(n.id)}>
-        <div className="card-top"><Icon name="note" size={18} /></div>
+        <div className="card-top">
+          <Icon name="note" size={18} />
+          <button className="card-delete" title="Удалить заметку" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+            <Icon name="trash" size={15} />
+          </button>
+        </div>
         <h3 className="card-title card-title--note">{n.title}</h3>
         <p className="card-syn card-syn--note">{text || "пустая заметка"}</p>
         <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(n.updatedAt)}</div>

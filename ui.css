@@ -55,7 +55,7 @@
 /* ---------- cards (v1.1 — div wrapper with inner button) ---------- */
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
 .card { position: relative; background: var(--sheet); border: 1px solid var(--line);
-  color: var(--ink); min-height: 200px; overflow: hidden;
+  color: var(--ink); min-height: 200px;
   transition: transform .32s var(--ease), box-shadow .32s var(--ease), border-color .32s var(--ease); }
 .card::before { content: ""; position: absolute; left: 0; top: 0; height: 3px; width: 0;
   background: var(--accent); transition: width .4s var(--ease); z-index: 1; }
@@ -67,10 +67,10 @@
   min-height: 200px; cursor: pointer; text-align: left; padding: 20px 22px 18px;
   box-sizing: border-box; }
 
-/* trash button — top-right, appears on hover */
-.card-delete { position: absolute; top: 10px; right: 10px; z-index: 10;
-  width: 30px; height: 30px; display: grid; place-items: center;
-  background: var(--paper); border: 1px solid transparent; color: var(--ink-faint);
+/* trash button — inline in card-top, pushed to the right, appears on hover */
+.card-delete { margin-left: auto; flex-shrink: 0;
+  width: 28px; height: 28px; display: grid; place-items: center;
+  background: transparent; border: 1px solid transparent; color: var(--ink-faint);
   opacity: 0; cursor: pointer;
   transition: opacity .2s var(--ease), color .18s, background .18s, border-color .18s, transform .18s; }
 .card:hover .card-delete { opacity: 1; }
