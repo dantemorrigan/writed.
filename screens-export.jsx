@@ -9,7 +9,7 @@ function BookPreview({ html, title, edition }) {
         <div className="book-page">
           <div className="book-content" dangerouslySetInnerHTML={{ __html: html || "<p></p>" }} />
         </div>
-        <div className="book-foot mono">{edition === "novel" ? "роман" : edition === "article" ? "статья" : "рассказ"} · предпросмотр издания</div>
+        <div className="book-foot mono">предпросмотр издания</div>
       </div>
     </div>
   );

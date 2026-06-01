@@ -208,6 +208,7 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
   const [dragId, setDragId] = useState(null);
   const [overId, setOverId] = useState(null);
   const [editTitle, setEditTitle] = useState(false);
+  const [editSynopsis, setEditSynopsis] = useState(false);
   const [deleteChap, setDeleteChap] = useState(null); // {id, title}
   const [deleteProject, setDeleteProject] = useState(false);
 
@@ -254,9 +255,15 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
               ) : (
                 <h1 className="proj-title" onClick={() => setEditTitle(true)} title="Нажмите, чтобы переименовать">{p.title}</h1>
               )}
-              {p.synopsis
-                ? <p className="proj-syn" onClick={() => { const v = prompt("Синопсис", p.synopsis); if (v != null) store.updateProject(p.id, { synopsis: v }); }}>{p.synopsis}</p>
-                : <button className="proj-syn-add mono" onClick={() => { const v = prompt("Синопсис проекта"); if (v) store.updateProject(p.id, { synopsis: v }); }}>+ добавить синопсис</button>}
+              {editSynopsis ? (
+                <textarea className="proj-syn-input" autoFocus defaultValue={p.synopsis} rows={3}
+                  onBlur={(e) => { store.updateProject(p.id, { synopsis: e.target.value.trim() }); setEditSynopsis(false); }}
+                  onKeyDown={(e) => { if (e.key === "Escape") setEditSynopsis(false); }} />
+              ) : p.synopsis ? (
+                <p className="proj-syn" onClick={() => setEditSynopsis(true)} title="Нажмите для редактирования">{p.synopsis}</p>
+              ) : (
+                <button className="proj-syn-add mono" onClick={() => setEditSynopsis(true)}>+ добавить синопсис</button>
+              )}
             </div>
             <div className="proj-hero-side">
               <div className="proj-bignum mono">{words.toLocaleString("ru-RU")}</div>

@@ -124,6 +124,8 @@ function useToast() {
   return [node, show];
 }
 
+const FONT_LABEL = { book: "Newsreader", article: "Spectral", mono: "JetBrains Mono" };
+
 Object.assign(window, {
-  useStore, Icon, ICONS, Logo, ThemeToggle, timeAgo, plural, wordsLabel, useToast,
+  useStore, Icon, ICONS, Logo, ThemeToggle, timeAgo, plural, wordsLabel, useToast, FONT_LABEL,
 });

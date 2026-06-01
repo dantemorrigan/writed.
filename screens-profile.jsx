@@ -4,6 +4,7 @@
 function Profile({ store, user, nav, onTheme, onToast }) {
   const stats = store.stats();
   const [name, setName] = useState(user.name);
+  const [confirmReset, setConfirmReset] = useState(false);
   const fileRef = useRef(null);
 
   function saveName() { const v = name.trim() || "Автор"; store.setUser({ name: v }); onToast("Имя сохранено"); }
@@ -18,7 +19,7 @@ function Profile({ store, user, nav, onTheme, onToast }) {
     r.readAsText(f); e.target.value = "";
   }
   function reset() {
-    if (confirm("Удалить все проекты, заметки и настройки? Это необратимо.")) { store.reset(); onToast("Данные сброшены"); nav.dashboard(); }
+    store.reset(); onToast("Данные сброшены"); nav.dashboard();
   }
 
   const STAT = [
@@ -90,11 +91,19 @@ function Profile({ store, user, nav, onTheme, onToast }) {
             <button className="btn btn--ghost" onClick={exportBackup}><Icon name="download" size={16}/> Экспорт бэкапа (JSON)</button>
             <button className="btn btn--ghost" onClick={()=>fileRef.current.click()}><Icon name="upload" size={16}/> Импорт бэкапа</button>
             <input ref={fileRef} type="file" accept="application/json,.json" style={{display:"none"}} onChange={onImport} />
-            <button className="btn btn--danger" onClick={reset}><Icon name="reset" size={16}/> Сбросить всё</button>
+            <button className="btn btn--danger" onClick={() => setConfirmReset(true)}><Icon name="reset" size={16}/> Сбросить всё</button>
           </div>
           <div style={{height:60}} />
         </div>
       </div>
+      {confirmReset && (
+        <ConfirmDelete
+          title="все проекты, заметки и настройки"
+          what="всё"
+          onConfirm={() => { setConfirmReset(false); reset(); }}
+          onCancel={() => setConfirmReset(false)}
+        />
+      )}
     </div>
   );
 }

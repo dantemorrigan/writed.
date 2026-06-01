@@ -114,6 +114,10 @@
   max-width: 56ch; line-height: 1.5; margin: 0; cursor: text; }
 .proj-syn-add { background: transparent; border: none; color: var(--ink-faint); font-size: var(--t-sm); padding: 0; }
 .proj-syn-add:hover { color: var(--accent); }
+.proj-syn-input { font-family: var(--book); font-size: var(--t-md); font-style: italic;
+  background: transparent; border: none; border-bottom: 1px solid var(--accent);
+  color: var(--ink-2); width: 100%; max-width: 56ch; resize: none; outline: none;
+  line-height: 1.5; padding: 4px 0; margin: 0; }
 .proj-hero-side { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .proj-bignum { font-size: var(--t-2xl); font-weight: 500; letter-spacing: -.03em; line-height: 1; }
 .proj-bignum-lbl { font-size: var(--t-xs); color: var(--ink-soft); letter-spacing: .04em; }
@@ -211,7 +215,7 @@
 .sheet-edge { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: .0; }
 .ed-area { outline: none; font-family: var(--ed-font, var(--book)); font-size: 20px; line-height: 1.75;
   color: var(--ink); max-width: var(--measure); caret-color: var(--accent); }
-.ed-area:empty::before { content: "Пишите…"; color: var(--ink-faint); }
+.ed-area:empty::before { content: "Пишите…"; color: var(--ink-faint); pointer-events: none; }
 .ed-area p { margin: 0 0 1.1em; }
 .ed-area h1 { font-size: 1.9em; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; margin: .2em 0 .7em; }
 .ed-area h2 { font-size: 1.45em; font-weight: 600; margin: 1.4em 0 .5em; }

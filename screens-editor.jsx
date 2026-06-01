@@ -3,6 +3,7 @@
    ============================================================ */
 function useDebouncedSave(docId, store) {
   const t = useRef(null);
+  useEffect(() => () => clearTimeout(t.current), [docId]);
   return useCallback((content) => {
     clearTimeout(t.current);
     t.current = setTimeout(() => store.updateDoc(docId, { content }), 500);
@@ -10,13 +11,12 @@ function useDebouncedSave(docId, store) {
 }
 
 const FONT_MAP = { book: "var(--book)", article: "var(--book-alt)", mono: "var(--mono)" };
-const FONT_LABEL = { book: "Newsreader", article: "Spectral", mono: "JetBrains Mono" };
 
 function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   const found = store.findDoc(docId);
   const ref = useRef(null);
   const scrollRef = useRef(null);
-  const saved = useRef(null);
+  const saved = useRef("");
   const [focusMode, setFocusMode] = useState(false);
   const [mode, setMode] = useState("edit");
   const [edition] = useState("novel");
@@ -32,16 +32,18 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
 
   useEffect(() => {
     if (ref.current && doc) {
-      ref.current.innerHTML = doc.content || "<p><br></p>";
-      saved.current = doc.content;
-      setWords(store.countWords(doc.content));
+      const html = doc.content || "";
+      saved.current = html;
+      ref.current.innerHTML = html;
+      try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (e) {}
+      setWords(store.countWords(html));
       setTimeout(() => ref.current && ref.current.focus(), 60);
     }
   }, [docId]);
 
   useEffect(() => {
     if (mode === "edit" && ref.current) {
-      ref.current.innerHTML = saved.current || (doc && doc.content) || "<p><br></p>";
+      ref.current.innerHTML = saved.current;
       setTimeout(() => ref.current && ref.current.focus(), 40);
     }
   }, [mode]);
@@ -102,7 +104,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   }
 
   function handleDelete() {
-    const isNote = !project;
     store.deleteDoc(docId);
     if (project) nav.project(project.id);
     else nav.dashboard();
@@ -138,6 +139,8 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
     };
     return () => { if (apiRef) apiRef.current = null; };
   });
+
+  const readMins = Math.max(1, Math.round(words / 200));
 
   if (!doc) return <div className="app-shell"><div className="empty mono">Документ не найден</div></div>;
 
@@ -224,6 +227,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
         </div>
         <div className="ed-count mono">
           <span className={"wc" + (savedFlash?" wc--saved":"")}>{wordsLabel(words)}</span>
+          {words > 0 && <><span className="ed-foot-sep">·</span><span>≈ {readMins} мин</span></>}
         </div>
       </footer>
 
