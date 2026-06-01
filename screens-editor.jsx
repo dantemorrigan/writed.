@@ -25,7 +25,20 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   const [renaming, setRenaming] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [kbOffset, setKbOffset] = useState(0);
   const doSave = useDebouncedSave(docId, store);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const off = window.innerHeight - vv.offsetTop - vv.height;
+      setKbOffset(Math.max(0, Math.round(off)));
+    };
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
 
   const doc = found && found.doc;
   const project = found && found.project;
@@ -182,24 +195,25 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
       </header>
 
       <div className="ed-body">
-        {mode === "edit" && (
-          <aside className="ed-tools">
-            {tools.map((grp, gi) => (
-              <div className="ed-tools-grp" key={gi}>
-                {grp.g.map(([icon, cmd]) => (
-                  <button key={cmd} className={"tool" + (active[cmd] || active.block===cmd ? " on" : "")}
-                    title={cmd} onMouseDown={(e) => { e.preventDefault();
-                      if (["h1","h2","h3","quote"].includes(cmd)) block(cmd==="quote"?"blockquote":cmd);
-                      else if (cmd==="strike") exec("strikeThrough");
-                      else if (cmd==="ul") exec("insertUnorderedList");
-                      else if (cmd==="ol") exec("insertOrderedList");
-                      else if (cmd==="hr") exec("insertHorizontalRule");
-                      else exec(cmd); }}>
-                    <Icon name={icon} size={19} />
-                  </button>
-                ))}
-              </div>
-            ))}
+        <aside className={"ed-tools" + (mode !== "edit" ? " ed-tools--preview" : "")}
+          style={kbOffset > 0 ? { bottom: kbOffset } : undefined}>
+          {mode === "edit" && tools.map((grp, gi) => (
+            <div className="ed-tools-grp" key={gi}>
+              {grp.g.map(([icon, cmd]) => (
+                <button key={cmd} className={"tool" + (active[cmd] || active.block===cmd ? " on" : "")}
+                  title={cmd} onMouseDown={(e) => { e.preventDefault();
+                    if (["h1","h2","h3","quote"].includes(cmd)) block(cmd==="quote"?"blockquote":cmd);
+                    else if (cmd==="strike") exec("strikeThrough");
+                    else if (cmd==="ul") exec("insertUnorderedList");
+                    else if (cmd==="ol") exec("insertOrderedList");
+                    else if (cmd==="hr") exec("insertHorizontalRule");
+                    else exec(cmd); }}>
+                  <Icon name={icon} size={19} />
+                </button>
+              ))}
+            </div>
+          ))}
+          {mode === "edit" && (
             <div className="ed-tools-grp ed-tools-fonts">
               {["book","article","mono"].map((f) => (
                 <button key={f} className={"tool tool--font" + (user.editorFont===f?" on":"")}
@@ -210,26 +224,37 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
                 </button>
               ))}
             </div>
-            <div className="ed-tools-grp ed-tools-modes">
-              <button className={"tool tool--focusdot" + (focusMode?" on":"")} title="Фокус" onClick={() => setFocusMode((f)=>!f)}>
-                <span className={"brand-dot-btn" + (focusMode?" active":"")} />
-              </button>
-            </div>
-          </aside>
-        )}
-
-        {mode === "edit" ? (
-          <div className="ed-scroll" ref={scrollRef}>
-            <div className="sheet" style={{ "--ed-font": editorFontVar }}>
-              <div className="sheet-edge" />
-              <div ref={ref} className="ed-area" contentEditable suppressContentEditableWarning
-                spellCheck={true}
-                onInput={onInput} onKeyUp={refreshActive}
-                onMouseUp={refreshActive} onFocus={refreshActive} />
-            </div>
-            <div style={{ height: "120px" }} />
+          )}
+          <div className="ed-tools-grp ed-tools-modes">
+            <button className={"tool tool--focusdot" + (focusMode?" on":"")} title="Фокус"
+              onClick={() => setFocusMode((f)=>!f)}>
+              <span className={"brand-dot-btn" + (focusMode?" active":"")} />
+            </button>
           </div>
-        ) : (
+          <div className="ed-tools-grp ed-tools-modetab">
+            <button className={"tool" + (mode==="edit"?" on":"")} title="Редактор"
+              onMouseDown={(e) => { e.preventDefault(); switchMode("edit"); }}>
+              <Icon name="edit" size={18} />
+            </button>
+            <button className={"tool" + (mode==="preview"?" on":"")} title="Превью"
+              onMouseDown={(e) => { e.preventDefault(); switchMode("preview"); }}>
+              <Icon name="eye" size={18} />
+            </button>
+          </div>
+        </aside>
+
+        <div className="ed-scroll" ref={scrollRef}
+          style={{ display: mode === "edit" ? "" : "none" }}>
+          <div className="sheet" style={{ "--ed-font": editorFontVar }}>
+            <div className="sheet-edge" />
+            <div ref={ref} className="ed-area" contentEditable suppressContentEditableWarning
+              spellCheck={true}
+              onInput={onInput} onKeyUp={refreshActive}
+              onMouseUp={refreshActive} onFocus={refreshActive} />
+          </div>
+          <div style={{ height: "120px" }} />
+        </div>
+        {mode === "preview" && (
           <BookPreview html={saved.current || doc.content} title={doc.title} edition={edition} />
         )}
       </div>

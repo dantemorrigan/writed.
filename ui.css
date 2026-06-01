@@ -210,6 +210,7 @@
 .tool--font { height: 36px; color: var(--ink-soft); }
 .tool--font.on { color: var(--accent); background: var(--accent-tint); font-weight: 600; }
 .ed-tools-fonts { margin-top: auto; }
+.ed-tools-modetab { display: none; }
 
 /* focus dot button */
 .brand-dot-btn {
@@ -458,22 +459,21 @@
   /* Use dynamic viewport height so layout shrinks when keyboard appears */
   .editor-root { height: 100dvh; }
 
-  /* Header: compact */
+  /* Header: compact — hide modeswitch (moved to toolbar) */
   .ed-head { padding: 10px 14px; gap: 8px; }
   .ed-head-r { gap: 4px; }
-  .modeswitch { margin-right: 0; }
-  .modeswitch-b { padding: 7px 10px; gap: 5px; font-size: var(--t-xs); }
+  .modeswitch { display: none; }
 
-  /* Body: switch to column — editor above, toolbar below */
+  /* Body: normal flex, toolbar is fixed */
   .ed-body { flex-direction: column; }
 
-  /* Scroll area fills all available space */
-  .ed-scroll { order: 1; flex: 1; padding-bottom: 24px; }
+  /* Scroll area fills all available space; leave room for fixed toolbar */
+  .ed-scroll { order: 1; flex: 1; padding-bottom: 72px; }
 
-  /* Toolbar: in document flow at the bottom, horizontally scrollable */
+  /* Toolbar: fixed to bottom, floats above the keyboard via JS kbOffset */
   .ed-tools {
-    order: 2;
-    position: static;   /* override any absolute from base styles */
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
     flex-direction: row;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -484,16 +484,19 @@
     align-items: center;
     border-right: none;
     border-top: 1px solid var(--line);
-    padding: 8px 12px;
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    padding: 7px 10px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7px);
     gap: 2px;
-    background: color-mix(in srgb, var(--paper) 97%, transparent);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    z-index: 20;
-    transition: opacity .3s var(--ease);
+    background: color-mix(in srgb, var(--paper) 96%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 40;
+    transition: bottom .12s linear;
   }
   .ed-tools::-webkit-scrollbar { display: none; }
+
+  /* When in preview mode toolbar shows only focus + mode tabs */
+  .ed-tools--preview { padding: 7px 10px; }
 
   /* Toolbar groups: horizontal with right-border separators */
   .ed-tools-grp {
@@ -510,6 +513,9 @@
   .ed-tools-modes { margin-top: 0; }
   .ed-tools-fonts { margin-top: 0; }
 
+  /* Mode-tab group: pushed to the right end */
+  .ed-tools-modetab { display: flex; margin-left: auto; flex-shrink: 0; border-right: none; padding-right: 0; margin-right: 0; }
+
   /* Sheet: comfortable writing area */
   .sheet { padding: 36px 22px; margin: 20px 10px; }
   .editor-root.focus .sheet { padding: 7vh 24px 40vh; }
@@ -517,6 +523,9 @@
   /* Footer: compact on mobile */
   .ed-foot-meta { padding: 0 14px; }
   .ed-count { padding: 0 14px; }
+
+  /* Focus mode: hide toolbar */
+  .editor-root.focus .ed-tools { display: none; }
 
   /* modals */
   .export-modal { grid-template-columns: 1fr; height: 94vh; }
@@ -551,7 +560,6 @@
 
   /* Editor: phone-optimised */
   .ed-head { padding: 8px 10px; }
-  .modeswitch-b span { display: none; }
   .ed-area { font-size: 18px; line-height: 1.72; }
   .sheet { padding: 28px 16px; margin: 14px 0; box-shadow: none; }
   .editor-root.focus .sheet { padding: 6vh 18px 40vh; }
