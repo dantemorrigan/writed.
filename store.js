@@ -1,7 +1,5 @@
 /* ============================================================
    Writed. — local data store
-   Prototype stand-in for IndexedDB + persist storage.
-   Everything lives in localStorage; pub/sub for React.
    ============================================================ */
 (function () {
   const KEY = "writed:v1";
@@ -107,6 +105,10 @@
         content: "", updatedAt: now() };
       p.chapters.push(c); p.updatedAt = now(); commit(); return c.id;
     },
+    deleteChapter(pid, cid) {
+      const p = state.projects.find((x) => x.id === pid);
+      if (p) { p.chapters = p.chapters.filter((c) => c.id !== cid); p.updatedAt = now(); commit(); }
+    },
 
     /* ---- notes ---- */
     createNote(title) {
@@ -139,6 +141,7 @@
       if (!f) return;
       if (f.kind === "note") state.notes = state.notes.filter((n) => n.id !== docId);
       else f.project.chapters = f.project.chapters.filter((c) => c.id !== docId);
+      if (f.kind === "chapter" && f.project) f.project.updatedAt = now();
       commit();
     },
 

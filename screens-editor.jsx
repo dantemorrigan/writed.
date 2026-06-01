@@ -1,5 +1,5 @@
 /* ============================================================
-   Writed. — Editor (+ docked terminal, focus)
+   Writed. — Editor (focus mode)
    ============================================================ */
 function useDebouncedSave(docId, store) {
   const t = useRef(null);
@@ -19,18 +19,18 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   const saved = useRef(null);
   const [panel, setPanel] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
-  const [mode, setMode] = useState("edit");     // edit | preview
-  const [edition, setEdition] = useState("novel");
+  const [mode, setMode] = useState("edit");
+  const [edition] = useState("novel");
   const [active, setActive] = useState({});
   const [words, setWords] = useState(0);
   const [renaming, setRenaming] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const doSave = useDebouncedSave(docId, store);
 
   const doc = found && found.doc;
   const project = found && found.project;
 
-  // initial content load (only when doc id changes)
   useEffect(() => {
     if (ref.current && doc) {
       ref.current.innerHTML = doc.content || "<p><br></p>";
@@ -40,8 +40,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
     }
   }, [docId]);
 
-  // when returning to the editor (same doc, mode toggled) the contentEditable
-  // node is freshly mounted — restore the latest content so text never vanishes
   useEffect(() => {
     if (mode === "edit" && ref.current) {
       ref.current.innerHTML = saved.current || (doc && doc.content) || "<p><br></p>";
@@ -49,7 +47,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
     }
   }, [mode]);
 
-  // capture current text before leaving the editor surface
   function switchMode(m) {
     if (mode === "edit" && ref.current) {
       saved.current = ref.current.innerHTML;
@@ -60,7 +57,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
 
   const editorFontVar = FONT_MAP[user.editorFont] || FONT_MAP.book;
 
-  // leave focus mode with Escape
   useEffect(() => {
     if (!focusMode) return;
     const onKey = (e) => { if (e.key === "Escape") setFocusMode(false); };
@@ -106,7 +102,13 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
     setSavedFlash(true); setTimeout(() => setSavedFlash(false), 1400);
   }
 
-  // expose API to the global palette
+  function handleDelete() {
+    const isNote = !project;
+    store.deleteDoc(docId);
+    if (project) nav.project(project.id);
+    else nav.dashboard();
+  }
+
   useEffect(() => {
     if (!apiRef) return;
     apiRef.current = {
@@ -148,7 +150,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
 
   return (
     <div className={"editor-root" + (focusMode ? " focus" : "") + (panel ? "" : " nopanel")}>
-      {/* slim header */}
       <header className="ed-head">
         <div className="ed-head-l">
           <button className="icon-btn" onClick={() => project ? nav.project(project.id) : nav.dashboard()} title="Назад"><Icon name="back" size={18} /></button>
@@ -169,18 +170,15 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
             <button className={"modeswitch-b" + (mode==="edit"?" on":"")} onClick={() => switchMode("edit")}><Icon name="edit" size={15} /> Редактор</button>
             <button className={"modeswitch-b" + (mode==="preview"?" on":"")} onClick={() => switchMode("preview")}><Icon name="eye" size={15} /> Превью</button>
           </div>
-          {mode === "preview" && (
-            <div className="seg seg--sm" style={{ display: "none" }} />
-          )}
           <button className={"icon-btn" + (savedFlash ? " icon-btn--flash" : "")} onClick={saveNow} title="Сохранить"><Icon name="save" size={18} /></button>
           {project && <button className="icon-btn" onClick={() => nav.export(project.id)} title="Экспорт книги"><Icon name="export" size={18} /></button>}
+          <button className="icon-btn icon-btn--danger" onClick={() => setConfirmDelete(true)} title="Удалить документ"><Icon name="trash" size={18} /></button>
           <ThemeToggle theme={user.theme} onChange={onTheme} />
           <button className={"icon-btn" + (panel?" active":"")} onClick={() => setPanel((p) => !p)} title="Панель инструментов"><Icon name="panel" size={18} /></button>
         </div>
       </header>
 
       <div className="ed-body">
-        {/* left toolbar */}
         {mode === "edit" && (
           <aside className="ed-tools">
             {tools.map((grp, gi) => (
@@ -205,7 +203,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
           </aside>
         )}
 
-        {/* writing surface OR preview */}
         {mode === "edit" ? (
           <div className="ed-scroll" ref={scrollRef}>
             <div className="sheet" style={{ "--ed-font": editorFontVar }}>
@@ -222,7 +219,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
         )}
       </div>
 
-      {/* word count footer */}
       <footer className="ed-foot">
         <div className="ed-foot-meta mono">
           {project ? project.title : "Заметка"} <span className="ed-foot-sep">·</span> {doc.title}
@@ -234,6 +230,15 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
       </footer>
 
       {focusMode && <div className="focus-hint mono">Esc — выйти из фокуса</div>}
+
+      {confirmDelete && (
+        <ConfirmDelete
+          title={doc.title}
+          what={project ? "главу" : "заметку"}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
     </div>
   );
 }

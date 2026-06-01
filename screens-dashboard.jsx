@@ -21,8 +21,27 @@ function TopBar({ user, nav, onTheme, right }) {
   );
 }
 
+/* ---- Confirm delete dialog ---- */
+function ConfirmDelete({ title, what, onConfirm, onCancel }) {
+  return (
+    <div className="modal-scrim" onMouseDown={onCancel}>
+      <div className="confirm-modal" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="confirm-icon"><Icon name="trash" size={22} /></div>
+        <div className="confirm-title">Удалить {what}?</div>
+        <div className="confirm-name">«{title}»</div>
+        <p className="confirm-note mono">Это действие необратимо. Все данные будут утеряны.</p>
+        <div className="confirm-actions">
+          <button className="btn btn--ghost" onClick={onCancel}>Отмена</button>
+          <button className="btn btn--danger" onClick={onConfirm}><Icon name="trash" size={15}/> Удалить</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ store, user, nav, onTheme }) {
   const [filter, setFilter] = useState("all");
+  const [deleteTarget, setDeleteTarget] = useState(null); // {kind, id, title}
   const s = store.get();
   const stats = store.stats();
 
@@ -31,6 +50,13 @@ function Dashboard({ store, user, nav, onTheme }) {
 
   const hour = new Date().getHours();
   const greet = hour < 5 ? "Доброй ночи" : hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
+
+  function handleDelete() {
+    if (!deleteTarget) return;
+    if (deleteTarget.kind === "project") store.deleteProject(deleteTarget.id);
+    else store.deleteNote(deleteTarget.id);
+    setDeleteTarget(null);
+  }
 
   return (
     <div className="app-shell screen-enter">
@@ -74,7 +100,10 @@ function Dashboard({ store, user, nav, onTheme }) {
             <section className="dash-section">
               <div className="section-head"><span className="eyebrow">Проекты</span><span className="rule-thin section-rule" /></div>
               <div className="card-grid">
-                {projects.map((p, i) => <ProjectCard key={p.id} p={p} store={store} nav={nav} idx={i} />)}
+                {projects.map((p, i) => (
+                  <ProjectCard key={p.id} p={p} store={store} nav={nav} idx={i}
+                    onDelete={() => setDeleteTarget({ kind: "project", id: p.id, title: p.title })} />
+                ))}
               </div>
             </section>
           )}
@@ -83,7 +112,10 @@ function Dashboard({ store, user, nav, onTheme }) {
             <section className="dash-section">
               <div className="section-head"><span className="eyebrow">Заметки</span><span className="rule-thin section-rule" /></div>
               <div className="card-grid">
-                {notes.map((n, i) => <NoteCard key={n.id} n={n} nav={nav} idx={i} />)}
+                {notes.map((n, i) => (
+                  <NoteCard key={n.id} n={n} nav={nav} idx={i}
+                    onDelete={() => setDeleteTarget({ kind: "note", id: n.id, title: n.title })} />
+                ))}
               </div>
             </section>
           )}
@@ -97,6 +129,15 @@ function Dashboard({ store, user, nav, onTheme }) {
           </footer>
         </div>
       </div>
+
+      {deleteTarget && (
+        <ConfirmDelete
+          title={deleteTarget.title}
+          what={deleteTarget.kind === "project" ? "проект" : "заметку"}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
@@ -106,41 +147,51 @@ function ProgressBar({ value, max, accent }) {
   return <div className="pbar"><span style={{ width: pct + "%", background: accent ? "var(--accent)" : "var(--ink)" }} /></div>;
 }
 
-function ProjectCard({ p, store, nav, idx }) {
+function ProjectCard({ p, store, nav, idx, onDelete }) {
   const words = store.projectWords(p);
   const goal = Math.max(2000, Math.ceil(words / 1000) * 1000 + 1000);
   return (
-    <button className="card card--project fade-up" style={{ animationDelay: idx * 60 + "ms" }} onClick={() => nav.project(p.id)}>
-      <div className="card-top">
-        <Icon name="folder" size={18} />
-        <span className={"chip mono " + (p.status === "done" ? "chip--done" : "chip--draft")}>
-          {p.status === "done" ? "завершён" : "черновик"}
-        </span>
-      </div>
-      <h3 className="card-title">{p.title}</h3>
-      {p.synopsis && <p className="card-syn">{p.synopsis}</p>}
-      <div className="card-bottom">
-        <div className="card-meta mono">
-          <span>{p.chapters.length} {plural(p.chapters.length,"глава","главы","глав")}</span>
-          <span className="dotsep">·</span>
-          <span>{words.toLocaleString("ru-RU")} слов</span>
+    <div className="card card--project fade-up" style={{ animationDelay: idx * 60 + "ms" }}>
+      <button className="card-delete" title="Удалить проект" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+        <Icon name="trash" size={15} />
+      </button>
+      <button className="card-inner" onClick={() => nav.project(p.id)}>
+        <div className="card-top">
+          <Icon name="folder" size={18} />
+          <span className={"chip mono " + (p.status === "done" ? "chip--done" : "chip--draft")}>
+            {p.status === "done" ? "завершён" : "черновик"}
+          </span>
         </div>
-        <ProgressBar value={words} max={goal} accent={p.status==="done"} />
-        <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(p.updatedAt)}</div>
-      </div>
-    </button>
+        <h3 className="card-title">{p.title}</h3>
+        {p.synopsis && <p className="card-syn">{p.synopsis}</p>}
+        <div className="card-bottom">
+          <div className="card-meta mono">
+            <span>{p.chapters.length} {plural(p.chapters.length,"глава","главы","глав")}</span>
+            <span className="dotsep">·</span>
+            <span>{words.toLocaleString("ru-RU")} слов</span>
+          </div>
+          <ProgressBar value={words} max={goal} accent={p.status==="done"} />
+          <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(p.updatedAt)}</div>
+        </div>
+      </button>
+    </div>
   );
 }
 
-function NoteCard({ n, nav, idx }) {
+function NoteCard({ n, nav, idx, onDelete }) {
   const text = (n.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   return (
-    <button className="card card--note fade-up" style={{ animationDelay: idx * 60 + "ms" }} onClick={() => nav.doc(n.id)}>
-      <div className="card-top"><Icon name="note" size={18} /></div>
-      <h3 className="card-title card-title--note">{n.title}</h3>
-      <p className="card-syn card-syn--note">{text || "пустая заметка"}</p>
-      <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(n.updatedAt)}</div>
-    </button>
+    <div className="card card--note fade-up" style={{ animationDelay: idx * 60 + "ms" }}>
+      <button className="card-delete" title="Удалить заметку" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+        <Icon name="trash" size={15} />
+      </button>
+      <button className="card-inner" onClick={() => nav.doc(n.id)}>
+        <div className="card-top"><Icon name="note" size={18} /></div>
+        <h3 className="card-title card-title--note">{n.title}</h3>
+        <p className="card-syn card-syn--note">{text || "пустая заметка"}</p>
+        <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(n.updatedAt)}</div>
+      </button>
+    </div>
   );
 }
 
@@ -151,6 +202,9 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
   const [dragId, setDragId] = useState(null);
   const [overId, setOverId] = useState(null);
   const [editTitle, setEditTitle] = useState(false);
+  const [deleteChap, setDeleteChap] = useState(null); // {id, title}
+  const [deleteProject, setDeleteProject] = useState(false);
+
   if (!p) { return <div className="app-shell"><TopBar user={user} nav={nav} onTheme={onTheme} /><div className="empty mono">Проект не найден</div></div>; }
 
   const words = store.projectWords(p);
@@ -163,6 +217,17 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
     ids.splice(to, 0, ids.splice(from, 1)[0]);
     store.reorderChapters(p.id, ids);
     setDragId(null); setOverId(null);
+  }
+
+  function handleDeleteChap() {
+    if (!deleteChap) return;
+    store.deleteChapter(p.id, deleteChap.id);
+    setDeleteChap(null);
+  }
+
+  function handleDeleteProject() {
+    store.deleteProject(p.id);
+    nav.dashboard();
   }
 
   return (
@@ -195,6 +260,9 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
                 onClick={() => store.updateProject(p.id, { status: p.status === "done" ? "draft" : "done" })}>
                 <Icon name="check" size={14} /> {p.status === "done" ? "завершён" : "отметить завершённым"}
               </button>
+              <button className="status-toggle mono proj-delete-btn" onClick={() => setDeleteProject(true)}>
+                <Icon name="trash" size={14} /> удалить проект
+              </button>
             </div>
           </section>
 
@@ -219,6 +287,8 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
                   <span className="chap-title">{c.title}</span>
                   <span className="chap-words mono">{cw.toLocaleString("ru-RU")} слов</span>
                   <span className="chap-time mono">{timeAgo(c.updatedAt)}</span>
+                  <span className="chap-del" onClick={(e) => { e.stopPropagation(); setDeleteChap({ id: c.id, title: c.title }); }}
+                    title="Удалить главу"><Icon name="trash" size={15} /></span>
                   <span className="chap-open"><Icon name="forward" size={16} /></span>
                 </li>
               );
@@ -230,8 +300,25 @@ function ProjectView({ store, user, nav, onTheme, projectId }) {
           <div style={{ height: 60 }} />
         </div>
       </div>
+
+      {deleteChap && (
+        <ConfirmDelete
+          title={deleteChap.title}
+          what="главу"
+          onConfirm={handleDeleteChap}
+          onCancel={() => setDeleteChap(null)}
+        />
+      )}
+      {deleteProject && (
+        <ConfirmDelete
+          title={p.title}
+          what="проект"
+          onConfirm={handleDeleteProject}
+          onCancel={() => setDeleteProject(false)}
+        />
+      )}
     </div>
   );
 }
 
-Object.assign(window, { TopBar, Dashboard, ProjectView, ProgressBar });
+Object.assign(window, { TopBar, Dashboard, ProjectView, ProgressBar, ConfirmDelete });
