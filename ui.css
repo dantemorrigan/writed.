@@ -282,7 +282,7 @@
 /* ---------- book preview ---------- */
 .preview-scroll { flex: 1; overflow-y: auto; background: var(--paper-2); padding: 44px 20px; }
 .book { max-width: 760px; margin: 0 auto; }
-.book-page { background: var(--sheet); box-shadow: var(--sheet-shadow); padding: 92px 88px; min-height: 70vh; color: var(--ink); }
+.book-page { background: var(--sheet); box-shadow: var(--sheet-shadow); padding: 92px 88px; min-height: 70vh; color: var(--ink); overflow-wrap: break-word; word-break: break-word; }
 .book-foot { text-align: center; padding: 18px; font-size: var(--t-xs); color: var(--ink-faint); letter-spacing: .12em; text-transform: uppercase; }
 .book-content { color: var(--ink); }
 .book-content h1 { margin: 0 0 1em; }
