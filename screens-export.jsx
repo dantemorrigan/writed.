@@ -1,0 +1,225 @@
+/* ============================================================
+   Writed. — Book preview + Export builder
+   ============================================================ */
+
+function BookPreview({ html, title, edition }) {
+  return (
+    <div className="preview-scroll">
+      <div className={"book book--" + edition}>
+        <div className="book-page">
+          <div className="book-content" dangerouslySetInnerHTML={{ __html: html || "<p></p>" }} />
+        </div>
+        <div className="book-foot mono">предпросмотр издания</div>
+      </div>
+    </div>
+  );
+}
+
+/* ---- html → plain / markdown ---- */
+function htmlToText(html) {
+  const d = document.createElement("div"); d.innerHTML = html || "";
+  return (d.textContent || "").replace(/\n{3,}/g, "\n\n").trim();
+}
+function htmlToMd(html) {
+  const d = document.createElement("div"); d.innerHTML = html || "";
+  let out = "";
+  d.childNodes.forEach((n) => {
+    if (n.nodeType === 3) { out += n.textContent; return; }
+    const t = n.tagName ? n.tagName.toLowerCase() : "";
+    const txt = (n.textContent || "").trim();
+    if (!txt && t !== "hr") return;
+    if (t === "h1") out += "\n# " + txt + "\n\n";
+    else if (t === "h2") out += "\n## " + txt + "\n\n";
+    else if (t === "h3") out += "\n### " + txt + "\n\n";
+    else if (t === "blockquote") out += "> " + txt.replace(/\n/g, "\n> ") + "\n\n";
+    else if (t === "hr") out += "\n---\n\n";
+    else if (t === "ul") n.querySelectorAll("li").forEach((li) => out += "- " + li.textContent.trim() + "\n"), out += "\n";
+    else if (t === "ol") { let i = 1; n.querySelectorAll("li").forEach((li) => out += (i++) + ". " + li.textContent.trim() + "\n"); out += "\n"; }
+    else out += txt + "\n\n";
+  });
+  return out.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function downloadBlob(name, mime, content) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+const MARGINS = { narrow: "14mm", normal: "22mm", wide: "32mm" };
+const SCREEN_PADS = { narrow: "12px", normal: "28px", wide: "60px" };
+
+function buildBookHTML(project, opts) {
+  const chapters = project.chapters.filter((c) => opts.include[c.id] !== false);
+  const fontStack = opts.font === "mono"
+    ? "'JetBrains Mono', monospace"
+    : opts.font === "article" ? "'Spectral', Georgia, serif" : "'Newsreader', Georgia, serif";
+  let body = "";
+  if (opts.titlePage) {
+    body += `<section class="b-title"><div class="b-kicker">WRITED.</div><h1>${project.title}</h1>${project.synopsis ? `<p class="b-syn">${project.synopsis}</p>` : ""}</section>`;
+  }
+  if (opts.toc) {
+    body += `<section class="b-toc"><h2>Содержание</h2><ol>${chapters.map((c) => `<li><span>${c.title}</span></li>`).join("")}</ol></section>`;
+  }
+  chapters.forEach((c, i) => {
+    body += `<section class="b-chap${opts.merge ? " merged" : ""}">${c.content || ""}</section>`;
+  });
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${project.title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Spectral:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    @page { margin: ${MARGINS[opts.margin]}; }
+    * { box-sizing: border-box; }
+    body { font-family: ${fontStack}; font-size: 12pt; line-height: ${opts.leading}; color: #1f1d18; background: #fff; margin: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    .b-kicker { font-family: 'JetBrains Mono', monospace; letter-spacing: .42em; font-size: 9pt; color: #c2542f; text-transform: uppercase; }
+    .b-title h1 { font-size: 30pt; line-height: 1.06; margin: 18px 0 16px; font-weight: 600; letter-spacing: -.015em; }
+    .b-syn { font-style: italic; color: #6b6457; font-size: 13pt; margin: 0 auto; max-width: 30em; }
+    .b-toc h2 { font-size: 15pt; font-weight: 600; margin: 0 0 .9em; letter-spacing: -.01em; }
+    .b-toc ol { line-height: 2.05; padding-left: 1.3em; color: #3a382f; margin: 0; }
+    h1 { font-size: 21pt; font-weight: 600; margin: 0 0 .8em; letter-spacing: -.01em; }
+    h2 { font-size: 15pt; font-weight: 600; margin: 1.3em 0 .4em; }
+    h3 { font-size: 12.5pt; font-weight: 600; margin: 1.1em 0 .3em; }
+    p { margin: 0; text-indent: 1.5em; text-align: justify; }
+    h1 + p, h2 + p, h3 + p, blockquote + p, ul + p, ol + p, hr + p, p:first-child { text-indent: 0; }
+    blockquote { margin: 1.1em 1.6em; font-style: italic; color: #555; }
+    ul, ol { padding-left: 1.5em; margin: .4em 0; } li { margin-bottom: .3em; text-align: left; }
+    hr { border: none; text-align: center; margin: 1.6em 0; }
+    hr:after { content: "✶"; color: #c2542f; }
+    /* on-screen preview: a single clean, centred book column */
+    @media screen {
+      body { padding: 60px 0 80px; }
+      body > section { max-width: 34em; margin: 0 auto; padding: 0 ${SCREEN_PADS[opts.margin]}; }
+      .b-title { text-align: center; padding-bottom: 46px; margin-bottom: 46px; border-bottom: 1px solid #e9e3d5; }
+      .b-toc { padding-bottom: 40px; margin-bottom: 40px; border-bottom: 1px solid #e9e3d5; }
+      .b-chap + .b-chap { margin-top: ${opts.merge ? "0" : "44px"}; }
+      .b-chap h1 { padding-top: ${opts.merge ? "0" : "26px"}; }
+      .b-chap:first-of-type h1 { padding-top: 0; }
+    }
+    /* print / PDF: real pagination */
+    @media print {
+      .b-title { text-align: center; padding-top: 34vh; page-break-after: always; }
+      .b-toc { page-break-after: always; padding-top: 12%; }
+      .b-chap { ${opts.merge ? "page-break-before: avoid; break-before: avoid;" : "page-break-before: always; break-before: page;"} }
+      .b-chap:first-of-type { page-break-before: avoid; break-before: avoid; }
+      h1 { ${opts.merge ? "" : "padding-top: 6%;"} }
+    }
+  </style></head><body>${body}</body></html>`;
+}
+
+function buildPlain(project, opts, md) {
+  const chapters = project.chapters.filter((c) => opts.include[c.id] !== false);
+  let out = "";
+  if (opts.titlePage) out += project.title.toUpperCase() + "\n" + (project.synopsis || "") + "\n\n\n";
+  if (opts.toc) out += "СОДЕРЖАНИЕ\n" + chapters.map((c, i) => (i + 1) + ". " + c.title).join("\n") + "\n\n\n";
+  chapters.forEach((c) => { out += (md ? htmlToMd(c.content) : htmlToText(c.content)) + "\n\n\n"; });
+  return out.trim() + "\n";
+}
+
+function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
+  const project = store.get().projects.find((p) => p.id === projectId);
+  const [opts, setOpts] = useState(() => ({
+    merge: false, titlePage: true, toc: true,
+    margin: "normal", font: "book", leading: 1.7,
+    include: {},
+  }));
+  const set = (patch) => setOpts((o) => ({ ...o, ...patch }));
+  if (!project) return null;
+
+  const previewHTML = useMemo(() => buildBookHTML(project, opts), [project, opts]);
+  const included = project.chapters.filter((c) => opts.include[c.id] !== false).length;
+
+  function doExport(fmt) {
+    const base = project.title.replace(/[^\wа-яёА-ЯЁ\- ]+/gi, "").trim() || "book";
+    if (fmt === "pdf") {
+      const w = window.open("", "_blank");
+      if (!w) { onToast("Разрешите всплывающие окна для печати в PDF"); return; }
+      w.document.write(buildBookHTML(project, opts));
+      w.document.close();
+      setTimeout(() => { w.focus(); w.print(); }, 700);
+      onToast("Открыто окно печати — сохраните как PDF");
+    } else if (fmt === "docx") {
+      downloadBlob(base + ".doc", "application/msword", buildBookHTML(project, opts));
+      onToast("Файл .doc скачан — откроется в Word");
+    } else if (fmt === "txt") {
+      downloadBlob(base + ".txt", "text/plain;charset=utf-8", buildPlain(project, opts, false));
+      onToast("Текстовый файл скачан");
+    } else if (fmt === "md") {
+      downloadBlob(base + ".md", "text/markdown;charset=utf-8", buildPlain(project, opts, true));
+      onToast("Markdown скачан");
+    }
+  }
+
+  return (
+    <div className="modal-scrim" onMouseDown={onClose}>
+      <div className="modal export-modal" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="export-side">
+          <div className="modal-head">
+            <div><div className="eyebrow">Собрать книгу</div><h2 className="modal-title">{project.title}</h2></div>
+            <button className="icon-btn" onClick={onClose}><Icon name="close" size={18} /></button>
+          </div>
+
+          <div className="exp-scroll">
+            <div className="exp-grp">
+              <div className="exp-grp-h mono">Главы · {included} из {project.chapters.length}</div>
+              <ul className="exp-chaps">
+                {project.chapters.map((c, i) => (
+                  <li key={c.id} className="exp-chap">
+                    <label>
+                      <input type="checkbox" checked={opts.include[c.id] !== false}
+                        onChange={(e) => set({ include: { ...opts.include, [c.id]: e.target.checked } })} />
+                      <span className="exp-chap-num mono">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="exp-chap-t">{c.title}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="exp-grp">
+              <div className="exp-grp-h mono">Структура</div>
+              {[["titlePage","Титульный лист"],["toc","Оглавление"],["merge","Объединить главы без разрывов"]].map(([k,l]) => (
+                <label key={k} className="exp-toggle">
+                  <span className={"switch" + (opts[k] ? " on" : "")} onClick={() => set({ [k]: !opts[k] })}><span /></span>
+                  {l}
+                </label>
+              ))}
+            </div>
+
+            <div className="exp-grp">
+              <div className="exp-grp-h mono">Вёрстка</div>
+              <div className="exp-row"><span className="exp-lbl">Поля</span>
+                <div className="seg seg--sm">{[["narrow","узкие"],["normal","обычные"],["wide","широкие"]].map(([k,l]) => (
+                  <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{l}</button>))}</div>
+              </div>
+              <div className="exp-row"><span className="exp-lbl">Шрифт</span>
+                <div className="seg seg--sm">{[["book","Newsreader"],["article","Spectral"],["mono","Mono"]].map(([k,l]) => (
+                  <button key={k} className={"seg-btn"+(opts.font===k?" on":"")} onClick={() => set({font:k})}>{l}</button>))}</div>
+              </div>
+              <div className="exp-row"><span className="exp-lbl">Интерлиньяж</span>
+                <input type="range" min="1.3" max="2.2" step="0.1" value={opts.leading}
+                  onChange={(e) => set({ leading: parseFloat(e.target.value) })} className="exp-range" />
+                <span className="mono exp-val">{opts.leading.toFixed(1)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="exp-actions">
+            <button className="btn btn--accent" onClick={() => doExport("pdf")}><Icon name="download" size={15} /> PDF</button>
+            <button className="btn" onClick={() => doExport("docx")}>DOCX</button>
+            <button className="btn" onClick={() => doExport("txt")}>TXT</button>
+            <button className="btn" onClick={() => doExport("md")}>MD</button>
+          </div>
+        </div>
+
+        <div className="export-preview">
+          <div className="export-preview-inner">
+            <iframe className="book-iframe" title="preview" srcDoc={previewHTML} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { BookPreview, ExportModal, htmlToText, htmlToMd, downloadBlob });

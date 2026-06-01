@@ -1,0 +1,112 @@
+/* ============================================================
+   Writed. — guided tour styling
+   Sharp-cornered coach-marks on warm paper. Matches the
+   Swiss/ink design system: --sheet card, --accent ring,
+   Newsreader titles, mono eyebrows, the living dot.
+   ============================================================ */
+
+:root, [data-theme="light"] { --tour-scrim: rgba(22, 18, 12, .52); }
+[data-theme="dark"]         { --tour-scrim: rgba(4, 3, 1, .66); }
+
+.tour-root { position: fixed; inset: 0; z-index: 5000; }
+
+/* full-screen click swallower so the page can't be mis-clicked mid-tour */
+.tour-catch { position: fixed; inset: 0; z-index: 5000; }
+
+/* dim everything except the cut-out; the huge spread paints the scrim */
+.tour-spot {
+  position: fixed; z-index: 5001; pointer-events: none;
+  box-shadow: 0 0 0 100vmax var(--tour-scrim);
+  outline: 1.5px solid var(--accent);
+  outline-offset: 0;
+  transition: top .42s var(--ease-out), left .42s var(--ease-out),
+              width .42s var(--ease-out), height .42s var(--ease-out);
+}
+/* faint accent halo + corner ticks for a drafting-table feel */
+.tour-spot::before {
+  content: ""; position: absolute; inset: -1.5px;
+  box-shadow: 0 0 0 4px var(--accent-tint);
+}
+
+/* centered intro/outro veil */
+.tour-veil {
+  position: fixed; inset: 0; z-index: 5001; pointer-events: none;
+  background: var(--tour-scrim);
+}
+
+/* ---- the card ---- */
+.tour-card {
+  position: fixed; z-index: 5002;
+  width: 332px; max-width: calc(100vw - 32px);
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  box-shadow: var(--sheet-shadow);
+  padding: 20px 22px 16px;
+  opacity: 0;
+}
+/* visibility is class-driven (never gated on the animation finishing),
+   so the card shows even with reduced motion or a suspended timeline */
+.tour-card.is-ready { opacity: 1; animation: tourCardRise .34s var(--ease-out); }
+@keyframes tourCardRise {
+  from { transform: translateY(7px); }
+  to   { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-card.is-ready { animation: none; }
+}
+
+/* caret pointing at the target */
+.tour-caret {
+  position: absolute; width: 11px; height: 11px;
+  background: var(--sheet); transform: rotate(45deg);
+}
+.tour-card--bottom .tour-caret { top: -6px; border-left: 1px solid var(--line); border-top: 1px solid var(--line); margin-left: -5.5px; }
+.tour-card--top    .tour-caret { bottom: -6px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-left: -5.5px; }
+.tour-card--right  .tour-caret { left: -6px; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: -5.5px; }
+.tour-card--left   .tour-caret { right: -6px; border-right: 1px solid var(--line); border-top: 1px solid var(--line); margin-top: -5.5px; }
+
+/* header: eyebrow + step counter */
+.tour-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.tour-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+.tour-eyebrow-dot {
+  width: 6px; height: 6px; background: var(--accent);
+  transform-origin: center; animation: pulse 2.4s var(--ease-in-out) infinite;
+}
+.tour-count { font-size: 10px; letter-spacing: .12em; color: var(--ink-faint); }
+
+.tour-title {
+  font-family: var(--book); font-weight: 500; font-size: 23px;
+  line-height: 1.1; letter-spacing: -.01em; color: var(--ink);
+  margin: 0 0 8px;
+}
+.tour-body {
+  font-family: var(--ui); font-size: 13.5px; line-height: 1.55;
+  color: var(--ink-2); margin: 0; text-wrap: pretty;
+}
+
+/* progress pips */
+.tour-pips { display: flex; gap: 5px; margin: 16px 0 14px; flex-wrap: wrap; }
+.tour-pip { width: 14px; height: 2px; background: var(--line); transition: background .3s var(--ease); }
+.tour-pip.done { background: var(--ink-faint); }
+.tour-pip.on { background: var(--accent); width: 22px; }
+
+/* footer actions */
+.tour-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tour-skip {
+  background: none; border: none; padding: 4px 0;
+  font-size: 11px; letter-spacing: .04em; color: var(--ink-faint);
+  text-decoration: underline; text-underline-offset: 3px;
+  transition: color .2s var(--ease);
+}
+.tour-skip:hover { color: var(--ink-2); }
+.tour-nav { display: flex; align-items: center; gap: 8px; }
+.tour-btn { padding: 9px 15px; font-size: 12.5px; }
+
+@media (max-width: 560px) {
+  .tour-card { width: calc(100vw - 28px); }
+  .tour-title { font-size: 21px; }
+}
