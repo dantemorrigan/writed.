@@ -13,6 +13,8 @@ function useDebouncedSave(docId, store) {
 const FONT_MAP = { book: "var(--book)", article: "var(--book-alt)", mono: "var(--mono)" };
 
 function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
+  const lang = user.lang || "en";
+  const tl = T(lang);
   const found = store.findDoc(docId);
   const ref = useRef(null);
   const scrollRef = useRef(null);
@@ -156,7 +158,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
 
   const readMins = Math.max(1, Math.round(words / 200));
 
-  if (!doc) return <div className="app-shell"><div className="empty mono">Документ не найден</div></div>;
+  if (!doc) return <div className="app-shell"><div className="empty mono">{tl("doc_not_found")}</div></div>;
 
   const tools = [
     { g: [["bold","bold"],["italic","italic"],["underline","underline"],["strike","strike"]] },
@@ -170,7 +172,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
     <div className={"editor-root" + (focusMode ? " focus" : "")}>
       <header className="ed-head">
         <div className="ed-head-l">
-          <button className="icon-btn" onClick={() => project ? nav.project(project.id) : nav.dashboard()} title="Назад"><Icon name="back" size={18} /></button>
+          <button className="icon-btn" onClick={() => project ? nav.project(project.id) : nav.dashboard()} title={tl("ed_back")}><Icon name="back" size={18} /></button>
           <div className="ed-crumb">
             {project && <span className="ed-crumb-proj" onClick={() => nav.project(project.id)}>{project.title}</span>}
             {project && <span className="ed-crumb-sep mono">/</span>}
@@ -179,22 +181,22 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
                 onBlur={(e) => { store.updateDoc(docId, { title: e.target.value.trim() || doc.title }); setRenaming(false); }}
                 onKeyDown={(e) => e.key === "Enter" && e.target.blur()} />
             ) : (
-              <span className="ed-crumb-doc" onClick={() => setRenaming(true)} title="Переименовать">{doc.title}</span>
+              <span className="ed-crumb-doc" onClick={() => setRenaming(true)} title={tl("ed_rename")}>{doc.title}</span>
             )}
           </div>
         </div>
         <div className="ed-head-r">
           <div className="modeswitch">
-            <button className={"modeswitch-b" + (mode==="edit"?" on":"")} onClick={() => switchMode("edit")}><Icon name="edit" size={15} /> Редактор</button>
-            <button className={"modeswitch-b" + (mode==="preview"?" on":"")} onClick={() => switchMode("preview")}><Icon name="eye" size={15} /> Превью</button>
+            <button className={"modeswitch-b" + (mode==="edit"?" on":"")} onClick={() => switchMode("edit")}><Icon name="edit" size={15} /> {tl("mode_edit")}</button>
+            <button className={"modeswitch-b" + (mode==="preview"?" on":"")} onClick={() => switchMode("preview")}><Icon name="eye" size={15} /> {tl("mode_preview")}</button>
           </div>
-          <button className={"icon-btn" + (savedFlash ? " icon-btn--flash" : "")} onClick={saveNow} title="Сохранить"><Icon name="save" size={18} /></button>
+          <button className={"icon-btn" + (savedFlash ? " icon-btn--flash" : "")} onClick={saveNow} title={tl("ed_save")}><Icon name="save" size={18} /></button>
           {project
-            ? <button className="icon-btn" onClick={() => nav.export(project.id)} title="Экспорт книги"><Icon name="export" size={18} /></button>
-            : <button className="icon-btn" onClick={() => setNoteExport(true)} title="Экспорт заметки"><Icon name="export" size={18} /></button>
+            ? <button className="icon-btn" onClick={() => nav.export(project.id)} title={tl("ed_export_book")}><Icon name="export" size={18} /></button>
+            : <button className="icon-btn" onClick={() => setNoteExport(true)} title={tl("ed_export_note")}><Icon name="export" size={18} /></button>
           }
-          <button className="icon-btn icon-btn--danger" onClick={() => setConfirmDelete(true)} title="Удалить документ"><Icon name="trash" size={18} /></button>
-          <ThemeToggle theme={user.theme} onChange={onTheme} />
+          <button className="icon-btn icon-btn--danger" onClick={() => setConfirmDelete(true)} title={tl("ed_delete_doc")}><Icon name="trash" size={18} /></button>
+          <ThemeToggle theme={user.theme} onChange={onTheme} lang={lang} />
         </div>
       </header>
 
@@ -230,17 +232,17 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
             </div>
           )}
           <div className="ed-tools-grp ed-tools-modes">
-            <button className={"tool tool--focusdot" + (focusMode?" on":"")} title="Фокус"
+            <button className={"tool tool--focusdot" + (focusMode?" on":"")} title={tl("focus_mode_btn")}
               onClick={() => setFocusMode((f)=>!f)}>
               <span className={"brand-dot-btn" + (focusMode?" active":"")} />
             </button>
           </div>
           <div className="ed-tools-grp ed-tools-modetab">
-            <button className={"tool" + (mode==="edit"?" on":"")} title="Редактор"
+            <button className={"tool" + (mode==="edit"?" on":"")} title={tl("mode_edit")}
               onMouseDown={(e) => { e.preventDefault(); switchMode("edit"); }}>
               <Icon name="edit" size={18} />
             </button>
-            <button className={"tool" + (mode==="preview"?" on":"")} title="Превью"
+            <button className={"tool" + (mode==="preview"?" on":"")} title={tl("mode_preview")}
               onMouseDown={(e) => { e.preventDefault(); switchMode("preview"); }}>
               <Icon name="eye" size={18} />
             </button>
@@ -259,25 +261,25 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
           <div style={{ height: "120px" }} />
         </div>
         {mode === "preview" && (
-          <BookPreview html={saved.current || doc.content} title={doc.title} edition={edition} />
+          <BookPreview html={saved.current || doc.content} title={doc.title} edition={edition} lang={lang} />
         )}
       </div>
 
       <footer className="ed-foot">
         <div className="ed-foot-meta mono">
-          {project ? project.title : "Заметка"} <span className="ed-foot-sep">·</span> {doc.title}
-          {savedFlash && <span className="ed-foot-saved">сохранено ✓</span>}
+          {project ? project.title : tl("note_label")} <span className="ed-foot-sep">·</span> {doc.title}
+          {savedFlash && <span className="ed-foot-saved">{tl("saved_flash")}</span>}
         </div>
         <div className="ed-count mono">
-          <span className={"wc" + (savedFlash?" wc--saved":"")}>{wordsLabel(words)}</span>
-          {words > 0 && <><span className="ed-foot-sep">·</span><span>≈ {readMins} мин</span></>}
+          <span className={"wc" + (savedFlash?" wc--saved":"")}>{wordsLabel(words, lang)}</span>
+          {words > 0 && <><span className="ed-foot-sep">·</span><span>≈ {readMins} {tl("read_min")}</span></>}
         </div>
       </footer>
 
       {focusMode && (
         <>
-          <div className="focus-hint mono">Esc — выйти из фокуса</div>
-          <button className="focus-exit-btn" onClick={() => setFocusMode(false)} title="Выйти из фокуса">
+          <div className="focus-hint mono">{tl("focus_exit_hint")}</div>
+          <button className="focus-exit-btn" onClick={() => setFocusMode(false)} title={tl("focus_exit_btn")}>
             <Icon name="close" size={18} />
           </button>
         </>
@@ -286,9 +288,10 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
       {confirmDelete && (
         <ConfirmDelete
           title={doc.title}
-          what={project ? "главу" : "заметку"}
+          what={tl(project ? "what_chapter" : "what_note")}
           onConfirm={handleDelete}
           onCancel={() => setConfirmDelete(false)}
+          lang={lang}
         />
       )}
       {noteExport && !project && (
@@ -296,6 +299,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
           note={{ ...doc, content: saved.current || doc.content }}
           onClose={() => setNoteExport(false)}
           onToast={onToast || (() => {})}
+          lang={lang}
         />
       )}
     </div>

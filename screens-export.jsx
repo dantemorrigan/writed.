@@ -2,11 +2,12 @@
    Writed. — Book preview + Export builder
    ============================================================ */
 
-function BookPreview({ html, title, edition }) {
+function BookPreview({ html, title, edition, lang }) {
   const scrollRef = useRef(null);
   const contentRef = useRef(null);
   const [showTop, setShowTop] = useState(false);
   const [anchorsOpen, setAnchorsOpen] = useState(false);
+  const tl = T(lang || "en");
 
   const { headings, htmlWithIds } = useMemo(() => {
     const div = document.createElement("div");
@@ -54,7 +55,7 @@ function BookPreview({ html, title, edition }) {
         <div className={"preview-anchors" + (anchorsOpen ? " open" : "")}>
           <button className="anchors-toggle" onClick={() => setAnchorsOpen((o) => !o)}>
             <Icon name="panel" size={14} />
-            <span>{anchorsOpen ? "Скрыть" : "Содержание"}</span>
+            <span>{anchorsOpen ? tl("anchors_hide") : tl("anchors_show")}</span>
           </button>
           {anchorsOpen && (
             <nav className="anchors-nav">
@@ -73,11 +74,11 @@ function BookPreview({ html, title, edition }) {
           <div className="book-content" ref={contentRef} dangerouslySetInnerHTML={{ __html: htmlWithIds }} />
         </div>
         <div className="book-foot mono">
-          предпросмотр · ≈&thinsp;{pageCount}&thinsp;{pageCount === 1 ? "стр." : pageCount < 5 ? "стр." : "стр."}
+          {tl("preview_label")} · ≈&thinsp;{pageCount}&thinsp;{lang === "ru" ? "стр." : "p."}
         </div>
       </div>
       {showTop && (
-        <button className="scroll-top-btn" onClick={scrollToTop} title="Наверх">
+        <button className="scroll-top-btn" onClick={scrollToTop} title={tl("scroll_top")}>
           <Icon name="chevron" size={18} style={{ transform: "rotate(180deg)" }} />
         </button>
       )}
@@ -195,6 +196,8 @@ function buildPlain(project, opts, md) {
 
 function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
   const project = store.get().projects.find((p) => p.id === projectId);
+  const lang = (store.get().user && store.get().user.lang) || "en";
+  const tl = T(lang);
   const [opts, setOpts] = useState(() => ({
     merge: false, titlePage: true, toc: true,
     margin: "normal", font: "book", leading: 1.7,
@@ -211,20 +214,20 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
     const base = project.title.replace(/[^\wа-яёА-ЯЁ\- ]+/gi, "").trim() || "book";
     if (fmt === "pdf") {
       const w = window.open("", "_blank");
-      if (!w) { onToast("Разрешите всплывающие окна для печати в PDF"); return; }
+      if (!w) { onToast(tl("exp_err_popup")); return; }
       w.document.write(buildBookHTML(project, opts));
       w.document.close();
       setTimeout(() => { w.focus(); w.print(); }, 700);
-      onToast("Открыто окно печати — сохраните как PDF");
+      onToast(tl("exp_toast_pdf"));
     } else if (fmt === "docx") {
       downloadBlob(base + ".doc", "application/msword", buildBookHTML(project, opts));
-      onToast("Файл .doc скачан — откроется в Word");
+      onToast(tl("exp_toast_docx"));
     } else if (fmt === "txt") {
       downloadBlob(base + ".txt", "text/plain;charset=utf-8", buildPlain(project, opts, false));
-      onToast("Текстовый файл скачан");
+      onToast(tl("exp_toast_txt"));
     } else if (fmt === "md") {
       downloadBlob(base + ".md", "text/markdown;charset=utf-8", buildPlain(project, opts, true));
-      onToast("Markdown скачан");
+      onToast(tl("exp_toast_md"));
     }
   }
 
@@ -233,13 +236,13 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
       <div className="modal export-modal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="export-side">
           <div className="modal-head">
-            <div><div className="eyebrow">Собрать книгу</div><h2 className="modal-title">{project.title}</h2></div>
+            <div><div className="eyebrow">{tl("exp_book_eyebrow")}</div><h2 className="modal-title">{project.title}</h2></div>
             <button className="icon-btn" onClick={onClose}><Icon name="close" size={18} /></button>
           </div>
 
           <div className="exp-scroll">
             <div className="exp-grp">
-              <div className="exp-grp-h mono">Главы · {included} из {project.chapters.length}</div>
+              <div className="exp-grp-h mono">{tl("exp_chapters_label")} · {included} {tl("exp_of")} {project.chapters.length}</div>
               <ul className="exp-chaps">
                 {project.chapters.map((c, i) => (
                   <li key={c.id} className="exp-chap">
@@ -255,11 +258,11 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
             </div>
 
             <div className="exp-grp">
-              <div className="exp-grp-h mono">Структура</div>
-              {[["titlePage","Титульный лист"],["toc","Оглавление"],["merge","Убрать разделители между главами"]].map(([k,l]) => (
+              <div className="exp-grp-h mono">{tl("exp_section_structure")}</div>
+              {[["titlePage","exp_title_page"],["toc","exp_toc"],["merge","exp_merge"]].map(([k,lk]) => (
                 <label key={k} className="exp-toggle">
                   <span className={"switch" + (opts[k] ? " on" : "")} onClick={() => set({ [k]: !opts[k] })}><span /></span>
-                  {l}
+                  {tl(lk)}
                 </label>
               ))}
             </div>
@@ -270,15 +273,15 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
                 <div className="seg seg--sm">{Object.entries(PAPER).map(([k, p]) => (
                   <button key={k} className={"seg-btn"+(opts.paperSize===k?" on":"")} onClick={() => set({paperSize:k})}>{p.label}</button>))}</div>
               </div>
-              <div className="exp-row"><span className="exp-lbl">Поля</span>
-                <div className="seg seg--sm">{[["narrow","узкие"],["normal","обычные"],["wide","широкие"]].map(([k,l]) => (
-                  <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{l}</button>))}</div>
+              <div className="exp-row"><span className="exp-lbl">{tl("exp_margins")}</span>
+                <div className="seg seg--sm">{[["narrow","exp_margin_narrow"],["normal","exp_margin_normal"],["wide","exp_margin_wide"]].map(([k,lk]) => (
+                  <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{tl(lk)}</button>))}</div>
               </div>
-              <div className="exp-row"><span className="exp-lbl">Шрифт</span>
+              <div className="exp-row"><span className="exp-lbl">{tl("exp_font")}</span>
                 <div className="seg seg--sm">{[["book","Newsreader"],["article","Spectral"],["mono","Mono"]].map(([k,l]) => (
                   <button key={k} className={"seg-btn"+(opts.font===k?" on":"")} onClick={() => set({font:k})}>{l}</button>))}</div>
               </div>
-              <div className="exp-row"><span className="exp-lbl">Интерлиньяж</span>
+              <div className="exp-row"><span className="exp-lbl">{tl("exp_leading")}</span>
                 <input type="range" min="1.3" max="2.2" step="0.1" value={opts.leading}
                   onChange={(e) => set({ leading: parseFloat(e.target.value) })} className="exp-range" />
                 <span className="mono exp-val">{opts.leading.toFixed(1)}</span>
@@ -332,7 +335,8 @@ function buildNoteHTML(note, opts) {
   </style></head><body><div class="n-wrap">${opts.titlePage ? `<div class="n-head"><div class="n-kicker">WRITED.</div><h1 class="n-title">${note.title}</h1></div>` : ""}${note.content || ""}</div></body></html>`;
 }
 
-function NoteExportModal({ note, onClose, onToast }) {
+function NoteExportModal({ note, onClose, onToast, lang }) {
+  const tl = T(lang || "en");
   const [opts, setOpts] = useState({ margin: "normal", font: "book", leading: 1.7, paperSize: "a4", titlePage: true });
   const set = (patch) => setOpts((o) => ({ ...o, ...patch }));
 
@@ -346,16 +350,16 @@ function NoteExportModal({ note, onClose, onToast }) {
       w.document.write(buildNoteHTML(note, opts));
       w.document.close();
       setTimeout(() => { w.focus(); w.print(); }, 700);
-      onToast("Открыто окно печати — сохраните как PDF");
+      onToast(tl("exp_toast_pdf"));
     } else if (fmt === "docx") {
       downloadBlob(base + ".doc", "application/msword", buildNoteHTML(note, opts));
-      onToast("Файл .doc скачан — откроется в Word");
+      onToast(tl("exp_toast_docx"));
     } else if (fmt === "txt") {
       downloadBlob(base + ".txt", "text/plain;charset=utf-8", htmlToText(note.content));
-      onToast("Текстовый файл скачан");
+      onToast(tl("exp_toast_txt"));
     } else if (fmt === "md") {
       downloadBlob(base + ".md", "text/markdown;charset=utf-8", "# " + note.title + "\n\n" + htmlToMd(note.content));
-      onToast("Markdown скачан");
+      onToast(tl("exp_toast_md"));
     }
   }
 
@@ -364,33 +368,33 @@ function NoteExportModal({ note, onClose, onToast }) {
       <div className="modal export-modal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="export-side">
           <div className="modal-head">
-            <div><div className="eyebrow">Экспорт заметки</div><h2 className="modal-title">{note.title}</h2></div>
+            <div><div className="eyebrow">{tl("exp_note_eyebrow")}</div><h2 className="modal-title">{note.title}</h2></div>
             <button className="icon-btn" onClick={onClose}><Icon name="close" size={18} /></button>
           </div>
 
           <div className="exp-scroll">
             <div className="exp-grp">
-              <div className="exp-grp-h mono">Оформление</div>
+              <div className="exp-grp-h mono">{tl("exp_section_decoration")}</div>
               <label className="exp-toggle">
                 <span className={"switch" + (opts.titlePage ? " on" : "")} onClick={() => set({ titlePage: !opts.titlePage })}><span /></span>
-                Заголовок заметки
+                {tl("exp_note_title_opt")}
               </label>
             </div>
             <div className="exp-grp">
-              <div className="exp-grp-h mono">Вёрстка</div>
+              <div className="exp-grp-h mono">{tl("exp_section_layout")}</div>
               <div className="exp-row"><span className="exp-lbl">Формат</span>
                 <div className="seg seg--sm">{Object.entries(PAPER).map(([k, p]) => (
                   <button key={k} className={"seg-btn"+(opts.paperSize===k?" on":"")} onClick={() => set({paperSize:k})}>{p.label}</button>))}</div>
               </div>
-              <div className="exp-row"><span className="exp-lbl">Поля</span>
-                <div className="seg seg--sm">{[["narrow","узкие"],["normal","обычные"],["wide","широкие"]].map(([k,l]) => (
-                  <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{l}</button>))}</div>
+              <div className="exp-row"><span className="exp-lbl">{tl("exp_margins")}</span>
+                <div className="seg seg--sm">{[["narrow","exp_margin_narrow"],["normal","exp_margin_normal"],["wide","exp_margin_wide"]].map(([k,lk]) => (
+                  <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{tl(lk)}</button>))}</div>
               </div>
-              <div className="exp-row"><span className="exp-lbl">Шрифт</span>
+              <div className="exp-row"><span className="exp-lbl">{tl("exp_font")}</span>
                 <div className="seg seg--sm">{[["book","Newsreader"],["article","Spectral"],["mono","Mono"]].map(([k,l]) => (
                   <button key={k} className={"seg-btn"+(opts.font===k?" on":"")} onClick={() => set({font:k})}>{l}</button>))}</div>
               </div>
-              <div className="exp-row"><span className="exp-lbl">Интерлиньяж</span>
+              <div className="exp-row"><span className="exp-lbl">{tl("exp_leading")}</span>
                 <input type="range" min="1.3" max="2.2" step="0.1" value={opts.leading}
                   onChange={(e) => set({ leading: parseFloat(e.target.value) })} className="exp-range" />
                 <span className="mono exp-val">{opts.leading.toFixed(1)}</span>

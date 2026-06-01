@@ -449,6 +449,13 @@
   transition: transform .35s var(--ease-out); transform-origin: center; }
 .onb-hint { font-size: var(--t-xs); color: var(--ink-soft); margin: 22px 0 0; letter-spacing: .03em; }
 .onb-actions { display: flex; gap: 12px; margin-top: 46px; }
+.onb-langs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 420px; margin-bottom: 28px; }
+.onb-lang-btn { display: flex; align-items: center; gap: 14px; background: var(--sheet); border: 1px solid var(--line);
+  padding: 18px 22px; cursor: pointer; font-family: var(--ui); font-size: var(--t-md); font-weight: 500;
+  color: var(--ink-2); transition: all .25s var(--ease-out); }
+.onb-lang-btn:hover { border-color: var(--ink-faint); color: var(--ink); transform: translateY(-2px); }
+.onb-lang-btn.on { border-color: var(--accent); color: var(--ink); box-shadow: 0 0 0 1px var(--accent); }
+.onb-lang-flag { font-size: 26px; line-height: 1; }
 .onb-themes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 620px; }
 .onb-theme { background: transparent; border: 1px solid var(--line); padding: 0; overflow: hidden; transition: all .3s var(--ease); cursor: pointer; }
 .onb-theme:hover { border-color: var(--ink-faint); transform: translateY(-2px); }
@@ -684,6 +691,7 @@
 
 /* ---- onboarding theme picker ---- */
 .onb-theme { border-radius: var(--r-lg); }
+.onb-lang-btn { border-radius: var(--r-lg); }
 .onb-pip { border-radius: var(--r-pill); }
 
 /* ---- dashboard filter bar: type · status · sort ---- */

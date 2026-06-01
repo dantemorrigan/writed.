@@ -2,6 +2,8 @@
    Writed. — Profile
    ============================================================ */
 function Profile({ store, user, nav, onTheme, onToast }) {
+  const lang = user.lang || "en";
+  const tl = T(lang);
   const stats = store.stats();
   const [name, setName] = useState(user.name);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -22,32 +24,33 @@ function Profile({ store, user, nav, onTheme, onToast }) {
       canvas.height = Math.round(img.height * scale);
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       store.setUser({ avatar: canvas.toDataURL("image/jpeg", 0.88) });
-      onToast("Фото обновлено");
+      onToast(tl("toast_avatar"));
     };
     img.src = url;
     e.target.value = "";
   }
 
-  function saveName() { const v = name.trim() || "Автор"; store.setUser({ name: v }); onToast("Имя сохранено"); }
+  function saveName() { const v = name.trim() || tl("default_author"); store.setUser({ name: v }); onToast(tl("toast_name")); }
   function exportBackup() {
     downloadBlob("writed-backup-" + new Date().toISOString().slice(0,10) + ".json", "application/json", store.exportAll());
-    onToast("Бэкап скачан");
+    onToast(tl("toast_backup_dl"));
   }
   function onImport(e) {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
-    r.onload = () => { if (store.importAll(r.result)) { onToast("Данные восстановлены"); nav.dashboard(); } else onToast("Не удалось прочитать файл"); };
+    r.onload = () => { if (store.importAll(r.result)) { onToast(tl("toast_restore_ok")); nav.dashboard(); } else onToast(tl("toast_restore_err")); };
     r.readAsText(f); e.target.value = "";
   }
   function reset() {
-    store.reset(); onToast("Данные сброшены"); nav.dashboard();
+    store.reset(); onToast(tl("toast_reset")); nav.dashboard();
   }
 
+  const locale = lang === "ru" ? "ru-RU" : "en-US";
   const STAT = [
-    [stats.words.toLocaleString("ru-RU"), "слов написано"],
-    [stats.projects, plural(stats.projects,"проект","проекта","проектов")],
-    [stats.chapters, plural(stats.chapters,"глава","главы","глав")],
-    [stats.notes, plural(stats.notes,"заметка","заметки","заметок")],
+    [stats.words.toLocaleString(locale), tl("stat_words_written")],
+    [stats.projects, pluralT(stats.projects, lang, "proj_one", "proj_few", "proj_many")],
+    [stats.chapters, pluralT(stats.chapters, lang, "chap_one", "chap_few", "chap_many")],
+    [stats.notes,    pluralT(stats.notes,    lang, "note_one", "note_few", "note_many")],
   ];
 
   return (
@@ -55,21 +58,21 @@ function Profile({ store, user, nav, onTheme, onToast }) {
       <TopBar user={user} store={store} nav={nav} onTheme={onTheme} />
       <div className="scroll-area">
         <div className="wrap wrap--narrow">
-          <button className="backlink mono" onClick={() => nav.dashboard()}><Icon name="back" size={14} /> на главную</button>
+          <button className="backlink mono" onClick={() => nav.dashboard()}><Icon name="back" size={14} /> {tl("prof_back")}</button>
 
           <section className="prof-hero">
-            <button className="prof-ava-wrap" onClick={() => avatarRef.current.click()} title="Загрузить фото">
+            <button className="prof-ava-wrap" onClick={() => avatarRef.current.click()} title={tl("prof_upload_photo")}>
               {user.avatar
-                ? <img src={user.avatar} alt="Аватар" className="prof-ava-img" />
-                : <span className="prof-ava mono">{(user.name||"А").trim().charAt(0).toUpperCase()}</span>
+                ? <img src={user.avatar} alt={tl("prof_avatar_alt")} className="prof-ava-img" />
+                : <span className="prof-ava mono">{(user.name || tl("default_author")).trim().charAt(0).toUpperCase()}</span>
               }
               <span className="prof-ava-overlay"><Icon name="upload" size={20} /></span>
               <input ref={avatarRef} type="file" accept="image/*" style={{display:"none"}} onChange={onAvatarChange} />
             </button>
             <div>
-              <div className="eyebrow">Профиль</div>
-              <h1 className="prof-name">{user.name || "Автор"}</h1>
-              <div className="prof-since mono">с нами с {new Date(user.createdAt).toLocaleDateString("ru-RU",{month:"long",year:"numeric"})}</div>
+              <div className="eyebrow">{tl("prof_eyebrow")}</div>
+              <h1 className="prof-name">{user.name || tl("default_author")}</h1>
+              <div className="prof-since mono">{tl("prof_since")} {new Date(user.createdAt).toLocaleDateString(locale, {month:"long",year:"numeric"})}</div>
             </div>
           </section>
 
@@ -82,10 +85,10 @@ function Profile({ store, user, nav, onTheme, onToast }) {
             ))}
           </div>
 
-          <div className="section-head"><span className="eyebrow">Настройки</span><span className="rule-thin section-rule" /></div>
+          <div className="section-head"><span className="eyebrow">{tl("prof_section_settings")}</span><span className="rule-thin section-rule" /></div>
 
           <div className="prof-set">
-            <span className="prof-set-l">Имя</span>
+            <span className="prof-set-l">{tl("prof_lbl_name")}</span>
             <div className="prof-set-c prof-name-edit">
               <input value={name} onChange={(e)=>setName(e.target.value)} onBlur={saveName}
                 onKeyDown={(e)=>e.key==="Enter"&&e.target.blur()} maxLength={40} className="prof-input" />
@@ -93,41 +96,52 @@ function Profile({ store, user, nav, onTheme, onToast }) {
           </div>
 
           <div className="prof-set">
-            <span className="prof-set-l">Тема</span>
+            <span className="prof-set-l">{tl("prof_lbl_lang")}</span>
             <div className="prof-set-c">
               <div className="seg seg--sm">
-                <button className={"seg-btn"+(user.theme==="light"?" on":"")} onClick={()=>onTheme("light")}><Icon name="sun" size={14}/> Светлая</button>
-                <button className={"seg-btn"+(user.theme==="dark"?" on":"")} onClick={()=>onTheme("dark")}><Icon name="moon" size={14}/> Тёмная</button>
+                <button className={"seg-btn"+(lang==="en"?" on":"")} onClick={()=>store.setUser({lang:"en"})}>🇬🇧 English</button>
+                <button className={"seg-btn"+(lang==="ru"?" on":"")} onClick={()=>store.setUser({lang:"ru"})}>🇷🇺 Русский</button>
               </div>
             </div>
           </div>
 
           <div className="prof-set">
-            <span className="prof-set-l">Знакомство</span>
+            <span className="prof-set-l">{tl("prof_lbl_theme")}</span>
+            <div className="prof-set-c">
+              <div className="seg seg--sm">
+                <button className={"seg-btn"+(user.theme==="light"?" on":"")} onClick={()=>onTheme("light")}><Icon name="sun" size={14}/> {tl("prof_theme_light")}</button>
+                <button className={"seg-btn"+(user.theme==="dark"?" on":"")} onClick={()=>onTheme("dark")}><Icon name="moon" size={14}/> {tl("prof_theme_dark")}</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="prof-set">
+            <span className="prof-set-l">{tl("prof_lbl_tour")}</span>
             <div className="prof-set-c">
               <button className="btn btn--ghost" onClick={() => { store.replayTour(); nav.dashboard(); }}>
-                <Icon name="eye" size={16}/> Повторить тур
+                <Icon name="eye" size={16}/> {tl("prof_tour_btn")}
               </button>
             </div>
           </div>
 
-          <div className="section-head"><span className="eyebrow">Данные</span><span className="rule-thin section-rule" /></div>
-          <p className="prof-note mono">Всё хранится только на этом устройстве. Сделайте резервную копию, чтобы не потерять написанное.</p>
+          <div className="section-head"><span className="eyebrow">{tl("prof_section_data")}</span><span className="rule-thin section-rule" /></div>
+          <p className="prof-note mono">{tl("prof_data_note")}</p>
           <div className="prof-data">
-            <button className="btn btn--ghost" onClick={exportBackup}><Icon name="download" size={16}/> Экспорт бэкапа (JSON)</button>
-            <button className="btn btn--ghost" onClick={()=>fileRef.current.click()}><Icon name="upload" size={16}/> Импорт бэкапа</button>
+            <button className="btn btn--ghost" onClick={exportBackup}><Icon name="download" size={16}/> {tl("prof_export_backup")}</button>
+            <button className="btn btn--ghost" onClick={()=>fileRef.current.click()}><Icon name="upload" size={16}/> {tl("prof_import_backup")}</button>
             <input ref={fileRef} type="file" accept="application/json,.json" style={{display:"none"}} onChange={onImport} />
-            <button className="btn btn--danger" onClick={() => setConfirmReset(true)}><Icon name="reset" size={16}/> Сбросить всё</button>
+            <button className="btn btn--danger" onClick={() => setConfirmReset(true)}><Icon name="reset" size={16}/> {tl("prof_reset_btn")}</button>
           </div>
           <div style={{height:60}} />
         </div>
       </div>
       {confirmReset && (
         <ConfirmDelete
-          title="все проекты, заметки и настройки"
-          what="всё"
+          title={tl("what_all")}
+          what=""
           onConfirm={() => { setConfirmReset(false); reset(); }}
           onCancel={() => setConfirmReset(false)}
+          lang={lang}
         />
       )}
     </div>

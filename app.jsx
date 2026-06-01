@@ -106,8 +106,8 @@ function App() {
     project: (id) => setRoute({ name: "project", id }),
     doc: (id) => setRoute({ name: "doc", id }),
     profile: () => setRoute({ name: "profile" }),
-    createProject: () => { const id = store.createProject("Новый проект"); setRoute({ name: "project", id }); toast("Проект создан"); },
-    createNote: () => { const id = store.createNote("Новая заметка"); setRoute({ name: "doc", id }); },
+    createProject: () => { const lang = store.get().user.lang || "en"; const tl = T(lang); const id = store.createProject(tl("default_project_title")); setRoute({ name: "project", id }); toast(tl("toast_project_created")); },
+    createNote: () => { const lang = store.get().user.lang || "en"; const tl = T(lang); const id = store.createNote(tl("default_note_title")); setRoute({ name: "doc", id }); },
     export: (pid, fmt) => setExportFor({ pid, fmt }),
   }), [store]);
 
@@ -132,7 +132,7 @@ function App() {
   }
 
   if (!s.onboarded || route.name === "onboarding") {
-    return <>{toastNode}<CustomCursor /><Onboarding onDone={(name, theme) => { store.completeOnboarding(name, theme); setRoute({ name: "dashboard" }); }} /></>;
+    return <>{toastNode}<CustomCursor /><Onboarding onDone={(name, theme, lang) => { store.completeOnboarding(name, theme, lang); setRoute({ name: "dashboard" }); }} /></>;
   }
 
   let screen;

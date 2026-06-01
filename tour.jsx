@@ -55,96 +55,95 @@ function tourComputePos(rect, cw, ch, prefer) {
 /* ---- step definitions ---- */
 function buildTourSteps(nav, store) {
   const s = store.get();
+  const lang = (s.user && s.user.lang) || "en";
+  const tl = T(lang);
   const proj = s.projects && s.projects[0];
   const chap = proj && proj.chapters && proj.chapters[0];
   const steps = [];
 
   steps.push({
     kind: "intro",
-    eyebrow: "тур по writed",
-    title: "Знакомство за минуту",
-    body: "Покажем главное: где живут проекты и заметки, как устроена книга и что умеет редактор. В любой момент можно пропустить.",
-    cta: "Показать",
+    eyebrow: tl("tour_intro_eyebrow"),
+    title: tl("tour_intro_title"),
+    body: tl("tour_intro_body"),
+    cta: tl("tour_intro_cta"),
   });
 
-  // ---- DASHBOARD ----
   steps.push({
     screen: "dashboard", goto: () => nav.dashboard(),
     selector: ".stats-dot-wrap", prefer: "bottom",
-    eyebrow: "главный экран", title: "Живая точка",
-    body: "Слово Writed. всегда возвращает на главную. А клик по самой точке раскрывает вашу статистику — сколько всего написано.",
+    eyebrow: tl("tour_dash_eyebrow"), title: tl("tour_dash_title"),
+    body: tl("tour_dash_body"),
   });
   steps.push({
     screen: "dashboard", selector: ".dash-actions", prefer: "bottom",
-    eyebrow: "с чего начать", title: "Проекты и заметки",
-    body: "Проект — это книга с главами и целью по словам. Заметка — одиночный лист для идей и набросков. Оба открываются в одном редакторе.",
+    eyebrow: tl("tour_create_eyebrow"), title: tl("tour_create_title"),
+    body: tl("tour_create_body"),
   });
   steps.push({
     screen: "dashboard", selector: ".dash-filter", prefer: "bottom",
-    eyebrow: "порядок", title: "Черновики и готовое",
-    body: "Фильтр прячет лишнее: оставьте только то, что в работе, или то, что уже завершено.",
+    eyebrow: tl("tour_filter_eyebrow"), title: tl("tour_filter_title"),
+    body: tl("tour_filter_body"),
   });
   steps.push({
     screen: "dashboard", selector: ".card-grid .card--project", prefer: "right",
-    eyebrow: "ваши работы", title: "Карточка проекта",
-    body: "Каждая карточка показывает число глав, слов и прогресс к цели. Сейчас заглянем внутрь одного проекта.",
+    eyebrow: tl("tour_card_eyebrow"), title: tl("tour_card_title"),
+    body: tl("tour_card_body"),
   });
 
-  // ---- PROJECT ----
   if (proj) {
     steps.push({
       screen: "project", goto: () => nav.project(proj.id),
       selector: ".proj-title", prefer: "bottom",
-      eyebrow: "внутри проекта", title: "Всё правится на месте",
-      body: "Нажмите на заголовок или синопсис — и пишите прямо поверх. Ничего сохранять вручную не нужно.",
+      eyebrow: tl("tour_proj_eyebrow"), title: tl("tour_proj_title"),
+      body: tl("tour_proj_body"),
     });
     steps.push({
       screen: "project", selector: ".proj-hero-side", prefer: "left",
-      eyebrow: "цель", title: "Слова и прогресс",
-      body: "Полоса показывает движение к цели по словам. Здесь же можно отметить проект завершённым.",
+      eyebrow: tl("tour_goal_eyebrow"), title: tl("tour_goal_title"),
+      body: tl("tour_goal_body"),
     });
     steps.push({
       screen: "project", selector: ".addchap", prefer: "bottom",
-      eyebrow: "главы", title: "Структура книги",
-      body: "Добавляйте главы по одной, а порядок меняйте перетаскиванием за ручку слева. Книга собирается из них.",
+      eyebrow: tl("tour_chap_eyebrow"), title: tl("tour_chap_title"),
+      body: tl("tour_chap_body"),
     });
     steps.push({
       screen: "project", selector: ".topbar-r .btn--ghost", prefer: "bottom",
-      eyebrow: "финал", title: "Собрать книгу",
-      body: "Когда рукопись готова — экспортируйте все главы в один файл одной кнопкой.",
+      eyebrow: tl("tour_export_eyebrow"), title: tl("tour_export_title"),
+      body: tl("tour_export_body"),
     });
   }
 
-  // ---- EDITOR ----
   if (chap) {
     steps.push({
       screen: "doc", goto: () => nav.doc(chap.id),
       selector: ".ed-tools-grp", prefer: "right",
-      eyebrow: "редактор", title: "Инструменты текста",
-      body: "Заголовки, цитаты, списки и выделение — самое нужное, без визуального шума. То же и в заметках.",
+      eyebrow: tl("tour_tools_eyebrow"), title: tl("tour_tools_title"),
+      body: tl("tour_tools_body"),
     });
     steps.push({
       screen: "doc", selector: ".modeswitch", prefer: "bottom",
-      eyebrow: "два взгляда", title: "Редактор и превью",
-      body: "Переключайтесь между рабочим текстом и тем, как глава будет выглядеть в готовой книге.",
+      eyebrow: tl("tour_modes_eyebrow"), title: tl("tour_modes_title"),
+      body: tl("tour_modes_body"),
     });
     steps.push({
       screen: "doc", selector: ".ed-tools-modes", prefer: "right",
-      eyebrow: "тишина", title: "Полный фокус",
-      body: "Эта точка убирает весь интерфейс и оставляет только лист. Вернуться — клавишей Esc.",
+      eyebrow: tl("tour_focus_eyebrow"), title: tl("tour_focus_title"),
+      body: tl("tour_focus_body"),
     });
     steps.push({
       screen: "doc", selector: ".ed-foot", prefer: "top",
-      eyebrow: "спокойствие", title: "Счёт и сохранение",
-      body: "Внизу — счётчик слов и время чтения. Текст сохраняется сам после каждой паузы.",
+      eyebrow: tl("tour_count_eyebrow"), title: tl("tour_count_title"),
+      body: tl("tour_count_body"),
     });
   }
 
   steps.push({
     kind: "outro", goto: () => nav.dashboard(),
-    eyebrow: "готово", title: "Чистый лист ждёт",
-    body: "Это всё, что нужно для начала. Повторить тур можно в профиле в любой момент.",
-    cta: "Начать писать",
+    eyebrow: tl("tour_outro_eyebrow"), title: tl("tour_outro_title"),
+    body: tl("tour_outro_body"),
+    cta: tl("tour_outro_cta"),
   });
 
   return steps;
@@ -152,6 +151,8 @@ function buildTourSteps(nav, store) {
 
 /* ---- the tour overlay ---- */
 function Tour({ store, nav, onFinish }) {
+  const lang = (store.get().user && store.get().user.lang) || "en";
+  const tl = T(lang);
   const steps = useMemo(() => buildTourSteps(nav, store), []);
   const [i, setI] = useState(0);
   const [rect, setRect] = useState(null);
@@ -263,16 +264,16 @@ function Tour({ store, nav, onFinish }) {
 
         <div className="tour-foot">
           <button className="tour-skip mono" onClick={onFinish}>
-            {last ? "" : "Пропустить тур"}
+            {last ? "" : tl("tour_skip")}
           </button>
           <div className="tour-nav">
             {i > 0 && !last && (
               <button className="btn btn--ghost tour-btn" onClick={back}>
-                <Icon name="back" size={15} /> Назад
+                <Icon name="back" size={15} /> {tl("tour_back")}
               </button>
             )}
             <button className={"btn tour-btn " + (last ? "btn--accent" : "btn--solid")} onClick={next}>
-              {step.cta || "Дальше"} <Icon name="forward" size={15} />
+              {step.cta || tl("tour_next")} <Icon name="forward" size={15} />
             </button>
           </div>
         </div>

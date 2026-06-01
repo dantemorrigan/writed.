@@ -128,10 +128,11 @@ function StatsDot({ store, nav }) {
 }
 
 /* ---------- theme toggle (sliding) ---------- */
-function ThemeToggle({ theme, onChange, compact }) {
+function ThemeToggle({ theme, onChange, lang }) {
   const dark = theme === "dark";
+  const tl = T(lang || "ru");
   return (
-    <button className="icon-btn" title={dark ? "Светлая тема" : "Тёмная тема"}
+    <button className="icon-btn" title={dark ? tl("theme_to_light") : tl("theme_to_dark")}
       onClick={() => onChange(dark ? "light" : "dark")}
       style={{ position: "relative", overflow: "hidden" }}>
       <span style={{ display: "grid", placeItems: "center", transition: "transform .5s var(--ease-in-out)",
@@ -142,23 +143,15 @@ function ThemeToggle({ theme, onChange, compact }) {
   );
 }
 
-/* ---------- relative time ---------- */
-function timeAgo(ts) {
-  const d = Date.now() - ts, m = 60000, h = 3600000, day = 86400000;
-  if (d < m) return "только что";
-  if (d < h) return Math.floor(d / m) + " мин назад";
-  if (d < day) return Math.floor(d / h) + " ч назад";
-  if (d < day * 2) return "вчера";
-  if (d < day * 30) return Math.floor(d / day) + " дн назад";
-  return new Date(ts).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
-}
+/* ---------- relative time (lang-aware via i18n.js) ---------- */
+function timeAgo(ts, lang) { return timeAgoT(ts, lang || "ru"); }
 function plural(n, one, few, many) {
   const m10 = n % 10, m100 = n % 100;
   if (m10 === 1 && m100 !== 11) return one;
   if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
   return many;
 }
-const wordsLabel = (n) => n + " " + plural(n, "слово", "слова", "слов");
+const wordsLabel = (n, lang) => wordsLabelT(n, lang || "ru");
 
 /* ---------- tiny toast ---------- */
 function useToast() {
@@ -180,5 +173,5 @@ function useToast() {
 const FONT_LABEL = { book: "Newsreader", article: "Spectral", mono: "JetBrains Mono" };
 
 Object.assign(window, {
-  useStore, Icon, ICONS, Logo, StatsDot, ThemeToggle, timeAgo, plural, wordsLabel, useToast, FONT_LABEL,
+  useStore, Icon, ICONS, Logo, StatsDot, ThemeToggle, timeAgo, plural, wordsLabel, useToast, FONT_LABEL, T,
 });

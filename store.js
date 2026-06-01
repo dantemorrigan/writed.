@@ -45,7 +45,7 @@
         content: "<blockquote>«Время — это вода, которую держат в ладонях.»</blockquote><p>— проверить источник</p>" }
     ];
     return {
-      user: { name: "", theme: "light", editorFont: "book", createdAt: now() },
+      user: { name: "", theme: "light", editorFont: "book", lang: "en", createdAt: now() },
       onboarded: false,
       projects: [p1, p2],
       notes
@@ -75,8 +75,9 @@
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
     /* ---- user / onboarding ---- */
-    completeOnboarding(name, theme) {
-      state.user.name = name || "Автор";
+    completeOnboarding(name, theme, lang) {
+      state.user.lang = lang || "en";
+      state.user.name = name || (lang === "ru" ? "Автор" : "Author");
       state.user.theme = theme || "light";
       state.onboarded = true;
       commit();
