@@ -100,17 +100,26 @@ body::before {
 .brand { font-family: var(--ui); font-weight: 600; letter-spacing: -.02em; line-height: 1;
   display: inline-flex; align-items: baseline; color: var(--ink); }
 .brand .dot {
-  display: inline-block; width: .26em; height: .26em; margin-left: .04em;
+  display: inline-block; width: .28em; height: .28em;
   border-radius: 2px; background: var(--accent);
-  transform-origin: left center;
+  transform-origin: center center;
   margin-left: .08em;
+  /* larger invisible hit area */
+  padding: 4px; margin: -4px -4px -4px calc(.08em - 4px);
+  cursor: pointer;
   animation: blink 1.15s steps(1) infinite;
+  transition: box-shadow .2s var(--ease);
 }
-.brand.alive .dot { animation: pulse 2.4s var(--ease-in-out) infinite; }
+.brand .dot:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.brand.alive .dot { animation: dotLive 3.6s var(--ease-in-out) infinite; }
 @keyframes blink { 0%,55%{opacity:1} 56%,100%{opacity:.18} }
-@keyframes pulse {
-  0%,100% { transform: scale(1); border-radius: 2px; }
-  50%     { transform: scale(1.55); border-radius: 50%; }
+@keyframes dotLive {
+  0%      { transform: scale(1)    translateY(0)    rotate(0deg);   border-radius: 2px; }
+  20%     { transform: scale(1.35) translateY(-2px) rotate(15deg);  border-radius: 40%; }
+  40%     { transform: scale(1.6)  translateY(0)    rotate(0deg);   border-radius: 50%; }
+  60%     { transform: scale(1.35) translateY(2px)  rotate(-15deg); border-radius: 40%; }
+  80%     { transform: scale(1.1)  translateY(0)    rotate(0deg);   border-radius: 20%; }
+  100%    { transform: scale(1)    translateY(0)    rotate(0deg);   border-radius: 2px; }
 }
 
 /* ---- utility ---- */

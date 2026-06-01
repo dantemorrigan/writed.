@@ -71,7 +71,7 @@ function Logo({ size = 22, alive = false, onClick, onDotClick, style }) {
       style={{ fontSize: size, cursor: onClick ? "pointer" : "default", ...style }}>
       Writed<span className="dot"
         onClick={onDotClick ? (e) => { e.stopPropagation(); onDotClick(e); } : undefined}
-        style={onDotClick ? { cursor: "pointer" } : undefined}
+        title={onDotClick ? "Статистика" : undefined}
       />
     </span>
   );

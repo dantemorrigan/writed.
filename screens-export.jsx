@@ -49,6 +49,7 @@ function downloadBlob(name, mime, content) {
 }
 
 const MARGINS = { narrow: "14mm", normal: "22mm", wide: "32mm" };
+const SCREEN_PADS = { narrow: "12px", normal: "28px", wide: "60px" };
 
 function buildBookHTML(project, opts) {
   const chapters = project.chapters.filter((c) => opts.include[c.id] !== false);
@@ -88,19 +89,19 @@ function buildBookHTML(project, opts) {
     /* on-screen preview: a single clean, centred book column */
     @media screen {
       body { padding: 60px 0 80px; }
-      body > section { max-width: 34em; margin: 0 auto; padding: 0 28px; }
+      body > section { max-width: 34em; margin: 0 auto; padding: 0 ${SCREEN_PADS[opts.margin]}; }
       .b-title { text-align: center; padding-bottom: 46px; margin-bottom: 46px; border-bottom: 1px solid #e9e3d5; }
       .b-toc { padding-bottom: 40px; margin-bottom: 40px; border-bottom: 1px solid #e9e3d5; }
-      .b-chap + .b-chap { margin-top: 44px; }
-      .b-chap h1 { padding-top: 26px; }
+      .b-chap + .b-chap { margin-top: ${opts.merge ? "0" : "44px"}; }
+      .b-chap h1 { padding-top: ${opts.merge ? "0" : "26px"}; }
       .b-chap:first-of-type h1 { padding-top: 0; }
     }
     /* print / PDF: real pagination */
     @media print {
       .b-title { text-align: center; padding-top: 34vh; page-break-after: always; }
       .b-toc { page-break-after: always; padding-top: 12%; }
-      .b-chap { ${opts.merge ? "" : "page-break-before: always;"} }
-      .b-chap:first-of-type { page-break-before: avoid; }
+      .b-chap { ${opts.merge ? "page-break-before: avoid; break-before: avoid;" : "page-break-before: always; break-before: page;"} }
+      .b-chap:first-of-type { page-break-before: avoid; break-before: avoid; }
       h1 { ${opts.merge ? "" : "padding-top: 6%;"} }
     }
   </style></head><body>${body}</body></html>`;
