@@ -52,7 +52,7 @@ function Profile({ store, user, nav, onTheme, onToast }) {
 
   return (
     <div className="app-shell screen-enter">
-      <TopBar user={user} nav={nav} onTheme={onTheme} />
+      <TopBar user={user} store={store} nav={nav} onTheme={onTheme} />
       <div className="scroll-area">
         <div className="wrap wrap--narrow">
           <button className="backlink mono" onClick={() => nav.dashboard()}><Icon name="back" size={14} /> на главную</button>

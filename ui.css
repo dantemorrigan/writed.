@@ -431,6 +431,14 @@
 .onb-theme-meta { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px;
   font-size: var(--t-sm); font-weight: 500; border-top: 1px solid var(--line); }
 
+/* ---------- touch devices: always show action buttons ---------- */
+@media (hover: none) {
+  .card-delete { opacity: 1; }
+  .chap-del { opacity: 0.7; }
+  .chap-grip { opacity: 0.4; }
+  .chap-open { opacity: 0.4; }
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 860px) {
   .wrap { padding: 20px 18px 0; }
@@ -445,20 +453,70 @@
   .proj-hero-side { flex-direction: row; flex-wrap: wrap; gap: 14px; }
   .card-grid { grid-template-columns: 1fr; gap: 12px; }
 
-  /* editor layout on mobile */
+  /* ---- mobile editor: immersive full-height layout ---- */
+
+  /* Use dynamic viewport height so layout shrinks when keyboard appears */
+  .editor-root { height: 100dvh; }
+
+  /* Header: compact */
   .ed-head { padding: 10px 14px; gap: 8px; }
   .ed-head-r { gap: 4px; }
   .modeswitch { margin-right: 0; }
   .modeswitch-b { padding: 7px 10px; gap: 5px; font-size: var(--t-xs); }
-  .ed-tools { position: absolute; bottom: 50px; left: 0; right: 0; flex-direction: row; flex-wrap: wrap;
-    justify-content: center; border-right: none; border-top: 1px solid var(--line); padding: 10px 8px; gap: 6px;
-    background: color-mix(in srgb, var(--paper) 96%, transparent); backdrop-filter: blur(12px); z-index: 20; }
-  .ed-tools-grp { flex-direction: row; border-bottom: none; padding-bottom: 0; gap: 2px; }
+
+  /* Body: switch to column — editor above, toolbar below */
+  .ed-body { flex-direction: column; }
+
+  /* Scroll area fills all available space */
+  .ed-scroll { order: 1; flex: 1; padding-bottom: 24px; }
+
+  /* Toolbar: in document flow at the bottom, horizontally scrollable */
+  .ed-tools {
+    order: 2;
+    position: static;   /* override any absolute from base styles */
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    align-items: center;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    padding: 8px 12px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    gap: 2px;
+    background: color-mix(in srgb, var(--paper) 97%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    z-index: 20;
+    transition: opacity .3s var(--ease);
+  }
+  .ed-tools::-webkit-scrollbar { display: none; }
+
+  /* Toolbar groups: horizontal with right-border separators */
+  .ed-tools-grp {
+    flex-direction: row;
+    flex-shrink: 0;
+    border-bottom: none;
+    border-right: 1px solid var(--line-2);
+    padding-bottom: 0;
+    padding-right: 6px;
+    margin-right: 4px;
+    gap: 2px;
+  }
+  .ed-tools-grp:last-child { border-right: none; padding-right: 0; margin-right: 0; }
   .ed-tools-modes { margin-top: 0; }
   .ed-tools-fonts { margin-top: 0; }
-  .ed-scroll { padding-bottom: 160px; }
+
+  /* Sheet: comfortable writing area */
   .sheet { padding: 36px 22px; margin: 20px 10px; }
   .editor-root.focus .sheet { padding: 7vh 24px 40vh; }
+
+  /* Footer: compact on mobile */
+  .ed-foot-meta { padding: 0 14px; }
+  .ed-count { padding: 0 14px; }
 
   /* modals */
   .export-modal { grid-template-columns: 1fr; height: 94vh; }
@@ -490,16 +548,22 @@
   .bigaction { padding: 16px 16px; gap: 12px; }
   .bigaction-t { font-size: var(--t-base); }
   .section-head { margin: 22px 0 14px; }
+
+  /* Editor: phone-optimised */
   .ed-head { padding: 8px 10px; }
   .modeswitch-b span { display: none; }
-  .sheet { padding: 28px 16px; margin: 16px 6px; }
-  .ed-area { font-size: 18px; }
-  .ed-tools { padding: 8px 4px; gap: 4px; bottom: 48px; }
-  .tool { width: 36px; height: 36px; }
-  .tool--font { height: 32px; }
+  .ed-area { font-size: 18px; line-height: 1.72; }
+  .sheet { padding: 28px 16px; margin: 14px 0; box-shadow: none; }
+  .editor-root.focus .sheet { padding: 6vh 18px 40vh; }
+
+  .ed-tools { padding: 6px 8px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); gap: 1px; }
+  .tool { width: 38px; height: 38px; }
+  .tool--font { height: 34px; }
+
   .ed-foot { font-size: var(--t-xs); }
-  .ed-foot-meta { padding: 0 12px; }
-  .ed-count { padding: 0 12px; }
+  .ed-foot-meta { padding: 0 10px; gap: 5px; }
+  .ed-count { padding: 0 10px; }
+
   .prof-stats { grid-template-columns: 1fr 1fr; gap: 1px; }
   .prof-stat { padding: 18px 14px; }
   .prof-stat-n { font-size: var(--t-lg); }
