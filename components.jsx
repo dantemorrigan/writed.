@@ -1,0 +1,184 @@
+/* ============================================================
+   Writed. — shared atoms (icons, logo, hooks)
+   ============================================================ */
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+/* ---------- store hook ---------- */
+function useStore() {
+  const [, force] = useState(0);
+  useEffect(() => WritedStore.subscribe(() => force((n) => n + 1)), []);
+  return WritedStore;
+}
+
+/* ---------- icons (geometric, 24px, stroke) ---------- */
+const P = { fill: "none", stroke: "currentColor", strokeWidth: 1.6,
+  strokeLinecap: "round", strokeLinejoin: "round" };
+const ICONS = {
+  bold: <path {...P} strokeWidth="2" d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z" />,
+  italic: <g {...P} strokeWidth="2"><line x1="15" y1="5" x2="10" y2="19"/><line x1="9" y1="5" x2="17" y2="5"/><line x1="6" y1="19" x2="14" y2="19"/></g>,
+  underline: <g {...P}><path d="M7 4v6a5 5 0 0 0 10 0V4"/><line x1="5" y1="20" x2="19" y2="20"/></g>,
+  strike: <g {...P}><line x1="5" y1="12" x2="19" y2="12"/><path d="M8 7a4 3 0 0 1 8 0M8 17a4 3 0 0 0 8 0"/></g>,
+  h1: <g {...P}><path d="M4 6v12M12 6v12M4 12h8"/><path d="M16 9l3-1v10" strokeWidth="1.4"/></g>,
+  h2: <g {...P}><path d="M4 6v12M12 6v12M4 12h8"/><path d="M16 9a2 2 0 1 1 3 1.6L16 18h4" strokeWidth="1.4"/></g>,
+  h3: <g {...P}><path d="M4 6v12M12 6v12M4 12h8"/><path d="M16 8.5a2 2 0 1 1 2.6 2 2 2 0 1 1-2.6 2.2" strokeWidth="1.4"/></g>,
+  quote: <g {...P}><path d="M9 7H5v6h4l-2 4M19 7h-4v6h4l-2 4"/></g>,
+  hr: <g {...P}><line x1="4" y1="12" x2="20" y2="12"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></g>,
+  ul: <g {...P}><line x1="9" y1="7" x2="20" y2="7"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="17" x2="20" y2="17"/><circle cx="5" cy="7" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="17" r="1" fill="currentColor"/></g>,
+  ol: <g {...P}><line x1="10" y1="7" x2="20" y2="7"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="17" x2="20" y2="17"/><path d="M4 6.5l1-.5v3M4 16h2l-2 2h2" strokeWidth="1.3"/></g>,
+  save: <g {...P}><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></g>,
+  rename: <g {...P}><path d="M4 20h16M6 16l9-9 3 3-9 9H6z"/></g>,
+  export: <g {...P}><path d="M12 15V4M8 8l4-4 4 4M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></g>,
+  download: <g {...P}><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></g>,
+  upload: <g {...P}><path d="M12 16V5M8 9l4-4 4 4M5 20h14"/></g>,
+  eye: <g {...P}><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></g>,
+  edit: <g {...P}><path d="M4 20h16M6 16l9-9 3 3-9 9H6z"/></g>,
+  panel: <g {...P}><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="9" y1="4" x2="9" y2="20"/></g>,
+  plus: <g {...P}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></g>,
+  folder: <g {...P}><path d="M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></g>,
+  note: <g {...P}><path d="M6 3h9l3 3v15H6zM9 8h6M9 12h6M9 16h4"/></g>,
+  drag: <g {...P}><circle cx="9" cy="6" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="18" r="1" fill="currentColor"/><circle cx="15" cy="6" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="18" r="1" fill="currentColor"/></g>,
+  back: <g {...P}><path d="M15 5l-7 7 7 7"/></g>,
+  forward: <g {...P}><path d="M9 5l7 7-7 7"/></g>,
+  settings: <g {...P}><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></g>,
+  search: <g {...P}><circle cx="11" cy="11" r="6"/><line x1="20" y1="20" x2="16" y2="16"/></g>,
+  sun: <g {...P}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></g>,
+  moon: <g {...P}><path d="M20 14a8 8 0 1 1-9-11 6.5 6.5 0 0 0 9 11z"/></g>,
+  check: <g {...P}><path d="M5 12l5 5 9-11"/></g>,
+  trash: <g {...P}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></g>,
+  reset: <g {...P}><path d="M4 12a8 8 0 1 1 2.3 5.6M4 18v-4h4"/></g>,
+  chevron: <g {...P}><path d="M6 9l6 6 6-6"/></g>,
+  sort: <g {...P}><path d="M7 4v16M7 20l-3-3M7 4l3 3M17 20V4M17 4l-3 3M17 20l3-3"/></g>,
+  close: <g {...P}><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></g>,
+  terminal: <g {...P}><path d="M5 7l4 4-4 4M11 16h7"/><rect x="2" y="3" width="20" height="18" rx="1"/></g>,
+  book: <g {...P}><path d="M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM20 5a1 1 0 0 0-1-1h-6v16h6a1 1 0 0 0 1-1z"/></g>,
+  type: <g {...P}><path d="M4 7V5h16v2M9 5v14M12 19H6M15 19h3"/></g>,
+  focus: <g {...P}><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></g>,
+  user: <g {...P}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g>,
+  clock: <g {...P}><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></g>,
+};
+function Icon({ name, size = 20, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className}
+      style={{ display: "block", flex: "0 0 auto", ...style }} aria-hidden="true">
+      {ICONS[name] || null}
+    </svg>
+  );
+}
+
+/* ---------- logo with the living dot ---------- */
+function Logo({ size = 22, alive = false, onClick, onDotClick, style }) {
+  return (
+    <span className={"brand" + (alive ? " alive" : "")} onClick={onClick}
+      style={{ fontSize: size, cursor: onClick ? "pointer" : "default", ...style }}>
+      Writed<span className="dot"
+        onClick={onDotClick ? (e) => { e.stopPropagation(); onDotClick(e); } : undefined}
+        title={onDotClick ? "Статистика" : undefined}
+      />
+    </span>
+  );
+}
+
+/* ---------- stats popup off the dot ---------- */
+function StatNum({ n, l }) {
+  return (
+    <div className="stats-popup-item">
+      <div className="stats-popup-n mono">{n}</div>
+      <div className="stats-popup-l mono">{l}</div>
+    </div>
+  );
+}
+
+function StatsDot({ store, nav }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const stats = store.stats();
+
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [open]);
+
+  return (
+    <div className="stats-dot-wrap" ref={wrapRef}>
+      <Logo size={19} alive
+        onClick={() => { setOpen(false); nav.dashboard(); }}
+        onDotClick={() => setOpen((o) => !o)}
+      />
+      {open && (
+        <div className="stats-popup">
+          <div className="stats-popup-label mono">написано</div>
+          <div className="stats-popup-grid">
+            <StatNum n={stats.words.toLocaleString("ru-RU")} l="слов" />
+            <StatNum n={stats.projects} l={plural(stats.projects, "проект", "проекта", "проектов")} />
+            <StatNum n={stats.chapters} l={plural(stats.chapters, "глава", "глав", "глав")} />
+            <StatNum n={stats.notes} l={plural(stats.notes, "заметка", "заметок", "заметок")} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- theme toggle (sliding) ---------- */
+function ThemeToggle({ theme, onChange, compact }) {
+  const dark = theme === "dark";
+  return (
+    <button className="icon-btn" title={dark ? "Светлая тема" : "Тёмная тема"}
+      onClick={() => onChange(dark ? "light" : "dark")}
+      style={{ position: "relative", overflow: "hidden" }}>
+      <span style={{ display: "grid", placeItems: "center", transition: "transform .5s var(--ease-in-out)",
+        transform: dark ? "rotate(0deg)" : "rotate(180deg)" }}>
+        <Icon name={dark ? "moon" : "sun"} size={18} />
+      </span>
+    </button>
+  );
+}
+
+/* ---------- relative time ---------- */
+function timeAgo(ts) {
+  const d = Date.now() - ts, m = 60000, h = 3600000, day = 86400000;
+  if (d < m) return "только что";
+  if (d < h) return Math.floor(d / m) + " мин назад";
+  if (d < day) return Math.floor(d / h) + " ч назад";
+  if (d < day * 2) return "вчера";
+  if (d < day * 30) return Math.floor(d / day) + " дн назад";
+  return new Date(ts).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+}
+function plural(n, one, few, many) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
+  return many;
+}
+const wordsLabel = (n) => n + " " + plural(n, "слово", "слова", "слов");
+
+/* ---------- tiny toast ---------- */
+function useToast() {
+  const [toast, setToast] = useState(null);
+  const show = useCallback((msg) => {
+    setToast({ msg, id: Math.random() });
+  }, []);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
+  const node = toast ? (
+    <div className="toast" key={toast.id}>{toast.msg}</div>
+  ) : null;
+  return [node, show];
+}
+
+const FONT_LABEL = { book: "Newsreader", article: "Spectral", mono: "JetBrains Mono" };
+
+Object.assign(window, {
+  useStore, Icon, ICONS, Logo, StatsDot, ThemeToggle, timeAgo, plural, wordsLabel, useToast, FONT_LABEL,
+});

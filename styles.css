@@ -1,0 +1,309 @@
+/* ============================================================
+   Writed. — design system
+   Helvetica/Swiss minimalism · tactile paper & ink · terminal
+   ============================================================ */
+
+/* ---- Fonts ---- */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --ui: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  --book: "Newsreader", Georgia, "Times New Roman", serif;
+  --book-alt: "Spectral", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* type scale */
+  --t-xs: 11px; --t-sm: 13px; --t-base: 15px; --t-md: 17px;
+  --t-lg: 22px; --t-xl: 30px; --t-2xl: 44px; --t-3xl: 68px; --t-4xl: 108px;
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease-in-out: cubic-bezier(.7,0,.3,1);
+  --dur: .5s;
+
+  --maxw: 1320px;
+  --measure: 66ch;       /* iA-Writer column */
+
+  /* radius scale — fluent / soft (Google · Figma) */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+}
+
+/* ---- Light (warm paper) ---- */
+:root, [data-theme="light"] {
+  --paper:    #f4f1ea;
+  --paper-2:  #ece7dc;
+  --paper-3:  #e3ddcf;
+  --sheet:    #fbfaf6;
+  --ink:      #1a1a18;
+  --ink-2:    #44413a;
+  --ink-soft: #807a6d;
+  --ink-faint:#a8a294;
+  --line:     rgba(26,26,24,.12);
+  --line-2:   rgba(26,26,24,.07);
+  --accent:   #c2542f;
+  --accent-2: #a8431f;
+  --accent-tint: rgba(194,84,47,.10);
+  --sheet-shadow: 0 2px 6px rgba(40,34,22,.05), 0 14px 40px -14px rgba(40,34,22,.20);
+  --shadow-1: 0 1px 2px rgba(40,34,22,.04), 0 3px 10px -4px rgba(40,34,22,.10);
+  --shadow-2: 0 2px 6px rgba(40,34,22,.05), 0 14px 36px -12px rgba(40,34,22,.16);
+  --shadow-3: 0 6px 18px rgba(40,34,22,.07), 0 34px 80px -24px rgba(40,34,22,.26);
+  --noise-op: .55;
+  color-scheme: light;
+}
+
+/* ---- Dark (night writing) ---- */
+[data-theme="dark"] {
+  --paper:    #15140f;
+  --paper-2:  #1d1b15;
+  --paper-3:  #24211a;
+  --sheet:    #1a1813;
+  --ink:      #ece7db;
+  --ink-2:    #c4bdac;
+  --ink-soft: #8a8373;
+  --ink-faint:#5d574a;
+  --line:     rgba(236,231,219,.14);
+  --line-2:   rgba(236,231,219,.07);
+  --accent:   #df6f44;
+  --accent-2: #e8825a;
+  --accent-tint: rgba(223,111,68,.14);
+  --sheet-shadow: 0 2px 8px rgba(0,0,0,.34), 0 18px 50px -18px rgba(0,0,0,.6);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.3), 0 3px 12px -4px rgba(0,0,0,.5);
+  --shadow-2: 0 2px 8px rgba(0,0,0,.34), 0 16px 42px -14px rgba(0,0,0,.6);
+  --shadow-3: 0 6px 20px rgba(0,0,0,.4), 0 40px 90px -26px rgba(0,0,0,.72);
+  --noise-op: .30;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--ui);
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: var(--t-base);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  overflow: hidden;
+}
+#root { height: 100%; }
+
+button { font-family: inherit; cursor: pointer; }
+::selection { background: var(--accent); color: var(--sheet); }
+[data-theme="dark"] ::selection { background: var(--accent); color: #15140f; }
+
+/* paper grain — applied to body via ::before, sits behind everything */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+  opacity: var(--noise-op);
+  background-image: url("paper.svg");
+  background-size: 220px 220px;
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] body::before { mix-blend-mode: screen; }
+
+/* ---- Living dot (brand mark) ---- */
+.brand { font-family: var(--ui); font-weight: 600; letter-spacing: -.02em; line-height: 1;
+  display: inline-flex; align-items: baseline; color: var(--ink);
+  position: relative;
+  transition: color .22s var(--ease); }
+.brand:hover { color: var(--accent); }
+.brand .dot {
+  display: block; width: .24em; height: .24em;
+  border-radius: 50%; background: var(--accent);
+  transform-origin: center center;
+  position: absolute; left: 50%; top: 50%; margin: 0;
+  animation: orbit 7s linear infinite;
+  transition: background .2s var(--ease), box-shadow .2s var(--ease);
+}
+/* invisible hit-area extension without shifting layout */
+.brand .dot::after {
+  content: ""; position: absolute;
+  inset: -6px;
+}
+.brand .dot:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+/* hover the whole logo → wordmark goes accent, dot goes white */
+.brand:hover .dot { background: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); }
+.brand.alive .dot { animation: orbit 5s linear infinite; }
+/* elliptical "moon" orbit around the word Writed (em-based → scales with logo size) */
+@keyframes orbit {
+  0%    { transform: translate(calc(-50% + 2.30em), calc(-50% + 0.00em)); }
+  8.33% { transform: translate(calc(-50% + 1.99em), calc(-50% - 0.48em)); }
+  16.66%{ transform: translate(calc(-50% + 1.15em), calc(-50% - 0.82em)); }
+  25%   { transform: translate(calc(-50% + 0.00em), calc(-50% - 0.95em)); }
+  33.33%{ transform: translate(calc(-50% - 1.15em), calc(-50% - 0.82em)); }
+  41.66%{ transform: translate(calc(-50% - 1.99em), calc(-50% - 0.48em)); }
+  50%   { transform: translate(calc(-50% - 2.30em), calc(-50% + 0.00em)); }
+  58.33%{ transform: translate(calc(-50% - 1.99em), calc(-50% + 0.48em)); }
+  66.66%{ transform: translate(calc(-50% - 1.15em), calc(-50% + 0.82em)); }
+  75%   { transform: translate(calc(-50% + 0.00em), calc(-50% + 0.95em)); }
+  83.33%{ transform: translate(calc(-50% + 1.15em), calc(-50% + 0.82em)); }
+  91.66%{ transform: translate(calc(-50% + 1.99em), calc(-50% + 0.48em)); }
+  100%  { transform: translate(calc(-50% + 2.30em), calc(-50% + 0.00em)); }
+}
+@keyframes dotLive {
+  0%,100% { transform: scale(1)    translateY(0);   border-radius: 2px; }
+  30%     { transform: scale(1.5)  translateY(-2px); border-radius: 50%; }
+  60%     { transform: scale(1.25) translateY(1px);  border-radius: 30%; }
+}
+
+/* ---- utility ---- */
+.mono { font-family: var(--mono); }
+.book { font-family: var(--book); }
+.eyebrow { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink-soft); }
+.rule { height: 1px; background: var(--ink); opacity: .9; }
+.rule-thin { height: 1px; background: var(--line); }
+
+.btn { font-family: var(--ui); font-size: var(--t-sm); font-weight: 500;
+  letter-spacing: .01em; border: 1px solid var(--ink); background: transparent;
+  color: var(--ink); padding: 11px 18px; border-radius: 0;
+  display: inline-flex; align-items: center; gap: 9px;
+  transition: all .28s var(--ease); position: relative; }
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn--solid { background: var(--ink); color: var(--paper); }
+.btn--solid:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn--ghost { border-color: var(--line); color: var(--ink-2); }
+.btn--ghost:hover { border-color: var(--ink); background: transparent; color: var(--ink); }
+.btn--accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+.btn--accent:hover { background: var(--accent-2); border-color: var(--accent-2); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.icon-btn { width: 38px; height: 38px; display: grid; place-items: center;
+  border: 1px solid transparent; background: transparent; color: var(--ink-2);
+  border-radius: 0; transition: all .22s var(--ease); }
+.icon-btn:hover { color: var(--ink); background: var(--paper-3); }
+.icon-btn.active { color: var(--accent); }
+
+/* focus ring */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* thin scrollbars */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--line); border-radius: 0;
+  border: 3px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); background-clip: padding-box; }
+
+/* screen transition */
+.screen-enter { animation: screenIn .6s var(--ease-out) both; }
+@keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* shared layout */
+.app-shell { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+.scroll-area { overflow-y: auto; overflow-x: hidden; flex: 1; }
+
+/* fade/slide helpers */
+.fade-up { animation: fadeUp .7s var(--ease-out) both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+/* ---- Splash screen ---- */
+.splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.splash--in  { animation: splashIn  .5s var(--ease-out) both; }
+.splash--out { animation: splashOut .6s var(--ease-in-out) both; }
+@keyframes splashIn  { from { opacity: 0; } to   { opacity: 1; } }
+@keyframes splashOut { from { opacity: 1; } to   { opacity: 0; } }
+
+.splash-mark {
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  animation: splashMarkIn .65s var(--ease-out) .1s both;
+}
+@keyframes splashMarkIn {
+  from { opacity: 0; transform: scale(.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.splash-mark .brand { font-size: 52px; }
+.splash-mark .splash-line {
+  width: 0; height: 1px; background: var(--ink);
+  animation: splashLineGrow .7s var(--ease-out) .3s both;
+}
+@keyframes splashLineGrow { from { width: 0; } to { width: 60px; } }
+.splash-mark .splash-sub {
+  font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink-soft);
+  opacity: 0; animation: splashFadeIn .5s var(--ease-out) .55s both;
+}
+@keyframes splashFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---- Custom cursor (desktop only) ---- */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
+  button, a, [role="button"], input, textarea, select, label { cursor: none; }
+  /* keep the floating dot+ring as the ONLY cursor — beat explicit
+     cursor:pointer/text on cards, chapters, titles, the logo dot, etc. */
+  *, *::before, *::after { cursor: none !important; }
+}
+
+.cursor-dot {
+  position: fixed; z-index: 10000; pointer-events: none;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translate(-50%, -50%);
+  transition: width .15s var(--ease), height .15s var(--ease), background .2s var(--ease), opacity .2s var(--ease);
+  will-change: transform;
+}
+.cursor-ring {
+  position: fixed; z-index: 9999; pointer-events: none;
+  top: 0; left: 0;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  opacity: .5;
+  transform: translate(-50%, -50%);
+  transition: width .3s var(--ease), height .3s var(--ease), opacity .3s var(--ease), border-color .2s var(--ease);
+  will-change: transform;
+}
+
+@media (hover: none) {
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+/* hover state — ring expands, dot shrinks */
+body.cursor-hover .cursor-dot  { width: 4px; height: 4px; background: var(--accent); }
+body.cursor-hover .cursor-ring { width: 44px; height: 44px; opacity: .35; border-color: var(--accent); }
+
+/* click state */
+body.cursor-click .cursor-dot  { width: 12px; height: 12px; background: var(--accent); }
+body.cursor-click .cursor-ring { width: 18px; height: 18px; opacity: .8; border-color: var(--accent); }
+
+/* text cursor — ring becomes a thin vertical line */
+body.cursor-text .cursor-dot  { width: 2px; height: 18px; border-radius: 1px; background: var(--accent); opacity: .7; }
+body.cursor-text .cursor-ring { opacity: 0; }
+
+/* ============================================================
+   REDESIGN v2 — fluent / soft (Google · Figma)
+   Rounded geometry + gentle easing on shared primitives.
+   Палитра, разметка и логика не тронуты — только форма.
+   ============================================================ */
+
+/* buttons — soft rounded, springier motion */
+.btn { border-radius: var(--r-md); transition: background .24s var(--ease-out),
+  color .24s var(--ease-out), border-color .24s var(--ease-out),
+  transform .24s var(--ease-out), box-shadow .24s var(--ease-out); }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(.985); }
+.btn--solid:hover { box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--ink) 60%, transparent); }
+.btn--accent:hover { box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
+
+/* icon buttons — rounded touch target */
+.icon-btn { border-radius: var(--r-sm); }
+
+/* focus ring — softer halo */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--r-sm); }
+
+/* rounded scrollbar thumbs */
+*::-webkit-scrollbar-thumb { border-radius: var(--r-pill); }
