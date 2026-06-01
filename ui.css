@@ -255,6 +255,14 @@
 .editor-root.focus .ed-area { font-size: 22px; }
 .focus-hint { position: fixed; bottom: 20px; right: 22px; z-index: 60; font-size: 11px;
   color: var(--ink-faint); opacity: .4; pointer-events: none; letter-spacing: .02em; transition: opacity .3s; }
+.focus-exit-btn { display: none; position: fixed; top: 14px; right: 14px; z-index: 60;
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 90%, transparent); backdrop-filter: blur(12px);
+  color: var(--ink-soft); display: none; place-items: center; transition: all .18s var(--ease); }
+.focus-exit-btn:hover { color: var(--ink); background: var(--paper-3); }
+@media (hover: none) {
+  .focus-exit-btn { display: grid; }
+}
 
 /* editor footer */
 .ed-foot { display: flex; align-items: stretch; gap: 0; border-top: 1px solid var(--line);

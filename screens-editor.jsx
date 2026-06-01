@@ -270,7 +270,14 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
         </div>
       </footer>
 
-      {focusMode && <div className="focus-hint mono">Esc — выйти из фокуса</div>}
+      {focusMode && (
+        <>
+          <div className="focus-hint mono">Esc — выйти из фокуса</div>
+          <button className="focus-exit-btn" onClick={() => setFocusMode(false)} title="Выйти из фокуса">
+            <Icon name="close" size={18} />
+          </button>
+        </>
+      )}
 
       {confirmDelete && (
         <ConfirmDelete
