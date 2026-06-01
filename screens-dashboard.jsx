@@ -152,7 +152,9 @@ function ProjectCard({ p, store, nav, idx, onDelete }) {
   const goal = Math.max(2000, Math.ceil(words / 1000) * 1000 + 1000);
   return (
     <div className="card card--project fade-up" style={{ animationDelay: idx * 60 + "ms" }}>
-      <button className="card-inner" onClick={() => nav.project(p.id)}>
+      <div className="card-inner" role="button" tabIndex={0}
+        onClick={() => nav.project(p.id)}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && nav.project(p.id)}>
         <div className="card-top">
           <Icon name="folder" size={18} />
           <span className={"chip mono " + (p.status === "done" ? "chip--done" : "chip--draft")}>
@@ -173,7 +175,7 @@ function ProjectCard({ p, store, nav, idx, onDelete }) {
           <ProgressBar value={words} max={goal} accent={p.status==="done"} />
           <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(p.updatedAt)}</div>
         </div>
-      </button>
+      </div>
     </div>
   );
 }
@@ -182,7 +184,9 @@ function NoteCard({ n, nav, idx, onDelete }) {
   const text = (n.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   return (
     <div className="card card--note fade-up" style={{ animationDelay: idx * 60 + "ms" }}>
-      <button className="card-inner" onClick={() => nav.doc(n.id)}>
+      <div className="card-inner" role="button" tabIndex={0}
+        onClick={() => nav.doc(n.id)}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && nav.doc(n.id)}>
         <div className="card-top">
           <Icon name="note" size={18} />
           <button className="card-delete" title="Удалить заметку" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
@@ -192,7 +196,7 @@ function NoteCard({ n, nav, idx, onDelete }) {
         <h3 className="card-title card-title--note">{n.title}</h3>
         <p className="card-syn card-syn--note">{text || "пустая заметка"}</p>
         <div className="card-time mono"><Icon name="clock" size={12} /> {timeAgo(n.updatedAt)}</div>
-      </button>
+      </div>
     </div>
   );
 }
