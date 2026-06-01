@@ -12,7 +12,7 @@ function useDebouncedSave(docId, store) {
 
 const FONT_MAP = { book: "var(--book)", article: "var(--book-alt)", mono: "var(--mono)" };
 
-function Editor({ store, user, nav, onTheme, docId, apiRef }) {
+function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
   const found = store.findDoc(docId);
   const ref = useRef(null);
   const scrollRef = useRef(null);
@@ -25,6 +25,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   const [renaming, setRenaming] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [noteExport, setNoteExport] = useState(false);
   const [kbOffset, setKbOffset] = useState(0);
   const doSave = useDebouncedSave(docId, store);
 
@@ -188,7 +189,10 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
             <button className={"modeswitch-b" + (mode==="preview"?" on":"")} onClick={() => switchMode("preview")}><Icon name="eye" size={15} /> Превью</button>
           </div>
           <button className={"icon-btn" + (savedFlash ? " icon-btn--flash" : "")} onClick={saveNow} title="Сохранить"><Icon name="save" size={18} /></button>
-          {project && <button className="icon-btn" onClick={() => nav.export(project.id)} title="Экспорт книги"><Icon name="export" size={18} /></button>}
+          {project
+            ? <button className="icon-btn" onClick={() => nav.export(project.id)} title="Экспорт книги"><Icon name="export" size={18} /></button>
+            : <button className="icon-btn" onClick={() => setNoteExport(true)} title="Экспорт заметки"><Icon name="export" size={18} /></button>
+          }
           <button className="icon-btn icon-btn--danger" onClick={() => setConfirmDelete(true)} title="Удалить документ"><Icon name="trash" size={18} /></button>
           <ThemeToggle theme={user.theme} onChange={onTheme} />
         </div>
@@ -285,6 +289,13 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
           what={project ? "главу" : "заметку"}
           onConfirm={handleDelete}
           onCancel={() => setConfirmDelete(false)}
+        />
+      )}
+      {noteExport && !project && (
+        <NoteExportModal
+          note={{ ...doc, content: saved.current || doc.content }}
+          onClose={() => setNoteExport(false)}
+          onToast={onToast || (() => {})}
         />
       )}
     </div>

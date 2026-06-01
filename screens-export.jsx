@@ -304,4 +304,116 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
   );
 }
 
-Object.assign(window, { BookPreview, ExportModal, htmlToText, htmlToMd, downloadBlob });
+function buildNoteHTML(note, opts) {
+  const fontStack = opts.font === "mono"
+    ? "'JetBrains Mono', monospace"
+    : opts.font === "article" ? "'Spectral', Georgia, serif" : "'Newsreader', Georgia, serif";
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${note.title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Spectral:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    @page { size: ${(PAPER[opts.paperSize] || PAPER.a4).size}; margin: ${MARGINS[opts.margin]}; }
+    * { box-sizing: border-box; }
+    body { font-family: ${fontStack}; font-size: 12pt; line-height: ${opts.leading}; color: #1f1d18; background: #fff; margin: 0; -webkit-font-smoothing: antialiased; overflow-wrap: break-word; word-break: break-word; }
+    h1 { font-size: 21pt; font-weight: 600; margin: 0 0 .8em; letter-spacing: -.01em; }
+    h2 { font-size: 15pt; font-weight: 600; margin: 1.3em 0 .4em; }
+    h3 { font-size: 12.5pt; font-weight: 600; margin: 1.1em 0 .3em; }
+    p { margin: 0 0 .8em; }
+    blockquote { margin: 1.1em 1.6em; font-style: italic; color: #555; border-left: 3px solid #c2542f; padding-left: 1em; }
+    ul, ol { padding-left: 1.5em; margin: .4em 0; } li { margin-bottom: .3em; }
+    hr { border: none; text-align: center; margin: 1.6em 0; }
+    hr:after { content: "✶"; color: #c2542f; }
+    .n-head { margin-bottom: 2em; padding-bottom: 1em; border-bottom: 1px solid #e9e3d5; }
+    .n-kicker { font-family: 'JetBrains Mono', monospace; letter-spacing: .42em; font-size: 9pt; color: #c2542f; text-transform: uppercase; margin-bottom: 10px; }
+    .n-title { font-size: 26pt; font-weight: 600; letter-spacing: -.015em; line-height: 1.1; margin: 0; }
+    @media screen {
+      body { padding: 60px 0 80px; }
+      .n-wrap { max-width: ${(PAPER[opts.paperSize] || PAPER.a4).em}; margin: 0 auto; padding: 0 ${SCREEN_PADS[opts.margin]}; }
+    }
+  </style></head><body><div class="n-wrap">${opts.titlePage ? `<div class="n-head"><div class="n-kicker">WRITED.</div><h1 class="n-title">${note.title}</h1></div>` : ""}${note.content || ""}</div></body></html>`;
+}
+
+function NoteExportModal({ note, onClose, onToast }) {
+  const [opts, setOpts] = useState({ margin: "normal", font: "book", leading: 1.7, paperSize: "a4", titlePage: true });
+  const set = (patch) => setOpts((o) => ({ ...o, ...patch }));
+
+  const previewHTML = useMemo(() => buildNoteHTML(note, opts), [note, opts]);
+
+  function doExport(fmt) {
+    const base = note.title.replace(/[^\wа-яёА-ЯЁ\- ]+/gi, "").trim() || "note";
+    if (fmt === "pdf") {
+      const w = window.open("", "_blank");
+      if (!w) { onToast("Разрешите всплывающие окна для печати в PDF"); return; }
+      w.document.write(buildNoteHTML(note, opts));
+      w.document.close();
+      setTimeout(() => { w.focus(); w.print(); }, 700);
+      onToast("Открыто окно печати — сохраните как PDF");
+    } else if (fmt === "docx") {
+      downloadBlob(base + ".doc", "application/msword", buildNoteHTML(note, opts));
+      onToast("Файл .doc скачан — откроется в Word");
+    } else if (fmt === "txt") {
+      downloadBlob(base + ".txt", "text/plain;charset=utf-8", htmlToText(note.content));
+      onToast("Текстовый файл скачан");
+    } else if (fmt === "md") {
+      downloadBlob(base + ".md", "text/markdown;charset=utf-8", "# " + note.title + "\n\n" + htmlToMd(note.content));
+      onToast("Markdown скачан");
+    }
+  }
+
+  return (
+    <div className="modal-scrim" onMouseDown={onClose}>
+      <div className="modal export-modal" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="export-side">
+          <div className="modal-head">
+            <div><div className="eyebrow">Экспорт заметки</div><h2 className="modal-title">{note.title}</h2></div>
+            <button className="icon-btn" onClick={onClose}><Icon name="close" size={18} /></button>
+          </div>
+
+          <div className="exp-scroll">
+            <div className="exp-grp">
+              <div className="exp-grp-h mono">Оформление</div>
+              <label className="exp-toggle">
+                <span className={"switch" + (opts.titlePage ? " on" : "")} onClick={() => set({ titlePage: !opts.titlePage })}><span /></span>
+                Заголовок заметки
+              </label>
+            </div>
+            <div className="exp-grp">
+              <div className="exp-grp-h mono">Вёрстка</div>
+              <div className="exp-row"><span className="exp-lbl">Формат</span>
+                <div className="seg seg--sm">{Object.entries(PAPER).map(([k, p]) => (
+                  <button key={k} className={"seg-btn"+(opts.paperSize===k?" on":"")} onClick={() => set({paperSize:k})}>{p.label}</button>))}</div>
+              </div>
+              <div className="exp-row"><span className="exp-lbl">Поля</span>
+                <div className="seg seg--sm">{[["narrow","узкие"],["normal","обычные"],["wide","широкие"]].map(([k,l]) => (
+                  <button key={k} className={"seg-btn"+(opts.margin===k?" on":"")} onClick={() => set({margin:k})}>{l}</button>))}</div>
+              </div>
+              <div className="exp-row"><span className="exp-lbl">Шрифт</span>
+                <div className="seg seg--sm">{[["book","Newsreader"],["article","Spectral"],["mono","Mono"]].map(([k,l]) => (
+                  <button key={k} className={"seg-btn"+(opts.font===k?" on":"")} onClick={() => set({font:k})}>{l}</button>))}</div>
+              </div>
+              <div className="exp-row"><span className="exp-lbl">Интерлиньяж</span>
+                <input type="range" min="1.3" max="2.2" step="0.1" value={opts.leading}
+                  onChange={(e) => set({ leading: parseFloat(e.target.value) })} className="exp-range" />
+                <span className="mono exp-val">{opts.leading.toFixed(1)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="exp-actions">
+            <button className="btn btn--accent" onClick={() => doExport("pdf")}><Icon name="download" size={15} /> PDF</button>
+            <button className="btn" onClick={() => doExport("docx")}>DOCX</button>
+            <button className="btn" onClick={() => doExport("txt")}>TXT</button>
+            <button className="btn" onClick={() => doExport("md")}>MD</button>
+          </div>
+        </div>
+
+        <div className="export-preview">
+          <div className="export-preview-inner">
+            <iframe className="book-iframe" title="preview" srcDoc={previewHTML} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { BookPreview, ExportModal, NoteExportModal, htmlToText, htmlToMd, downloadBlob });

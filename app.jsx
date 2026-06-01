@@ -138,7 +138,7 @@ function App() {
   let screen;
   if (route.name === "dashboard") screen = <Dashboard store={store} user={user} nav={nav} onTheme={setTheme} />;
   else if (route.name === "project") screen = <ProjectView store={store} user={user} nav={nav} onTheme={setTheme} projectId={route.id} />;
-  else if (route.name === "doc") screen = <Editor key={route.id} store={store} user={user} nav={nav} onTheme={setTheme} docId={route.id} apiRef={editorApi} />;
+  else if (route.name === "doc") screen = <Editor key={route.id} store={store} user={user} nav={nav} onTheme={setTheme} docId={route.id} apiRef={editorApi} onToast={toast} />;
   else if (route.name === "profile") screen = <Profile store={store} user={user} nav={nav} onTheme={setTheme} onToast={toast} />;
 
   return (
