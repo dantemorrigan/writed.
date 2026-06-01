@@ -23,6 +23,14 @@
 
   --maxw: 1320px;
   --measure: 66ch;       /* iA-Writer column */
+
+  /* radius scale — fluent / soft (Google · Figma) */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
 }
 
 /* ---- Light (warm paper) ---- */
@@ -40,7 +48,10 @@
   --accent:   #c2542f;
   --accent-2: #a8431f;
   --accent-tint: rgba(194,84,47,.10);
-  --sheet-shadow: 0 1px 2px rgba(40,34,22,.05), 0 18px 50px -18px rgba(40,34,22,.30);
+  --sheet-shadow: 0 2px 6px rgba(40,34,22,.05), 0 14px 40px -14px rgba(40,34,22,.20);
+  --shadow-1: 0 1px 2px rgba(40,34,22,.04), 0 3px 10px -4px rgba(40,34,22,.10);
+  --shadow-2: 0 2px 6px rgba(40,34,22,.05), 0 14px 36px -12px rgba(40,34,22,.16);
+  --shadow-3: 0 6px 18px rgba(40,34,22,.07), 0 34px 80px -24px rgba(40,34,22,.26);
   --noise-op: .55;
   color-scheme: light;
 }
@@ -60,7 +71,10 @@
   --accent:   #df6f44;
   --accent-2: #e8825a;
   --accent-tint: rgba(223,111,68,.14);
-  --sheet-shadow: 0 1px 2px rgba(0,0,0,.4), 0 30px 70px -28px rgba(0,0,0,.75);
+  --sheet-shadow: 0 2px 8px rgba(0,0,0,.34), 0 18px 50px -18px rgba(0,0,0,.6);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.3), 0 3px 12px -4px rgba(0,0,0,.5);
+  --shadow-2: 0 2px 8px rgba(0,0,0,.34), 0 16px 42px -14px rgba(0,0,0,.6);
+  --shadow-3: 0 6px 20px rgba(0,0,0,.4), 0 40px 90px -26px rgba(0,0,0,.72);
   --noise-op: .30;
   color-scheme: dark;
 }
@@ -98,15 +112,17 @@ body::before {
 
 /* ---- Living dot (brand mark) ---- */
 .brand { font-family: var(--ui); font-weight: 600; letter-spacing: -.02em; line-height: 1;
-  display: inline-flex; align-items: baseline; color: var(--ink); }
-.brand .dot {
-  display: inline-block; width: .26em; height: .26em;
-  border-radius: 2px; background: var(--accent);
-  transform-origin: center center;
-  margin-left: .08em;
+  display: inline-flex; align-items: baseline; color: var(--ink);
   position: relative;
-  animation: blink 1.15s steps(1) infinite;
-  transition: box-shadow .2s var(--ease);
+  transition: color .22s var(--ease); }
+.brand:hover { color: var(--accent); }
+.brand .dot {
+  display: block; width: .24em; height: .24em;
+  border-radius: 50%; background: var(--accent);
+  transform-origin: center center;
+  position: absolute; left: 50%; top: 50%; margin: 0;
+  animation: orbit 7s linear infinite;
+  transition: background .2s var(--ease), box-shadow .2s var(--ease);
 }
 /* invisible hit-area extension without shifting layout */
 .brand .dot::after {
@@ -114,8 +130,25 @@ body::before {
   inset: -6px;
 }
 .brand .dot:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
-.brand.alive .dot { animation: dotLive 3.6s var(--ease-in-out) infinite; }
-@keyframes blink { 0%,55%{opacity:1} 56%,100%{opacity:.18} }
+/* hover the whole logo → wordmark goes accent, dot goes white */
+.brand:hover .dot { background: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); }
+.brand.alive .dot { animation: orbit 5s linear infinite; }
+/* elliptical "moon" orbit around the word Writed (em-based → scales with logo size) */
+@keyframes orbit {
+  0%    { transform: translate(calc(-50% + 2.30em), calc(-50% + 0.00em)); }
+  8.33% { transform: translate(calc(-50% + 1.99em), calc(-50% - 0.48em)); }
+  16.66%{ transform: translate(calc(-50% + 1.15em), calc(-50% - 0.82em)); }
+  25%   { transform: translate(calc(-50% + 0.00em), calc(-50% - 0.95em)); }
+  33.33%{ transform: translate(calc(-50% - 1.15em), calc(-50% - 0.82em)); }
+  41.66%{ transform: translate(calc(-50% - 1.99em), calc(-50% - 0.48em)); }
+  50%   { transform: translate(calc(-50% - 2.30em), calc(-50% + 0.00em)); }
+  58.33%{ transform: translate(calc(-50% - 1.99em), calc(-50% + 0.48em)); }
+  66.66%{ transform: translate(calc(-50% - 1.15em), calc(-50% + 0.82em)); }
+  75%   { transform: translate(calc(-50% + 0.00em), calc(-50% + 0.95em)); }
+  83.33%{ transform: translate(calc(-50% + 1.15em), calc(-50% + 0.82em)); }
+  91.66%{ transform: translate(calc(-50% + 1.99em), calc(-50% + 0.48em)); }
+  100%  { transform: translate(calc(-50% + 2.30em), calc(-50% + 0.00em)); }
+}
 @keyframes dotLive {
   0%,100% { transform: scale(1)    translateY(0);   border-radius: 2px; }
   30%     { transform: scale(1.5)  translateY(-2px); border-radius: 50%; }
@@ -208,6 +241,9 @@ body::before {
 @media (hover: hover) and (pointer: fine) {
   body { cursor: none; }
   button, a, [role="button"], input, textarea, select, label { cursor: none; }
+  /* keep the floating dot+ring as the ONLY cursor — beat explicit
+     cursor:pointer/text on cards, chapters, titles, the logo dot, etc. */
+  *, *::before, *::after { cursor: none !important; }
 }
 
 .cursor-dot {
@@ -247,3 +283,27 @@ body.cursor-click .cursor-ring { width: 18px; height: 18px; opacity: .8; border-
 /* text cursor — ring becomes a thin vertical line */
 body.cursor-text .cursor-dot  { width: 2px; height: 18px; border-radius: 1px; background: var(--accent); opacity: .7; }
 body.cursor-text .cursor-ring { opacity: 0; }
+
+/* ============================================================
+   REDESIGN v2 — fluent / soft (Google · Figma)
+   Rounded geometry + gentle easing on shared primitives.
+   Палитра, разметка и логика не тронуты — только форма.
+   ============================================================ */
+
+/* buttons — soft rounded, springier motion */
+.btn { border-radius: var(--r-md); transition: background .24s var(--ease-out),
+  color .24s var(--ease-out), border-color .24s var(--ease-out),
+  transform .24s var(--ease-out), box-shadow .24s var(--ease-out); }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(.985); }
+.btn--solid:hover { box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--ink) 60%, transparent); }
+.btn--accent:hover { box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--accent) 65%, transparent); }
+
+/* icon buttons — rounded touch target */
+.icon-btn { border-radius: var(--r-sm); }
+
+/* focus ring — softer halo */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--r-sm); }
+
+/* rounded scrollbar thumbs */
+*::-webkit-scrollbar-thumb { border-radius: var(--r-pill); }

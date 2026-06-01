@@ -47,6 +47,7 @@ const ICONS = {
   trash: <g {...P}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></g>,
   reset: <g {...P}><path d="M4 12a8 8 0 1 1 2.3 5.6M4 18v-4h4"/></g>,
   chevron: <g {...P}><path d="M6 9l6 6 6-6"/></g>,
+  sort: <g {...P}><path d="M7 4v16M7 20l-3-3M7 4l3 3M17 20V4M17 4l-3 3M17 20l3-3"/></g>,
   close: <g {...P}><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></g>,
   terminal: <g {...P}><path d="M5 7l4 4-4 4M11 16h7"/><rect x="2" y="3" width="20" height="18" rx="1"/></g>,
   book: <g {...P}><path d="M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM20 5a1 1 0 0 0-1-1h-6v16h6a1 1 0 0 0 1-1z"/></g>,

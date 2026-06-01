@@ -110,3 +110,12 @@
   .tour-card { width: calc(100vw - 28px); }
   .tour-title { font-size: 21px; }
 }
+
+/* ============================================================
+   REDESIGN v2 — fluent / soft tour (Google · Figma)
+   ============================================================ */
+.tour-spot { outline-offset: 3px; border-radius: var(--r-md); }
+.tour-spot::before { inset: -1.5px; border-radius: calc(var(--r-md) + 2px); }
+.tour-card { border-radius: var(--r-lg); }
+.tour-pip { border-radius: var(--r-pill); }
+.tour-btn { border-radius: var(--r-md); }

@@ -117,7 +117,7 @@
     /* ---- notes ---- */
     createNote(title) {
       const n = { id: uid("n_"), title: title || "Новая заметка", status: "draft",
-        content: "", updatedAt: now() };
+        createdAt: now(), updatedAt: now(), content: "" };
       state.notes.unshift(n); commit(); return n.id;
     },
     deleteNote(id) { state.notes = state.notes.filter((n) => n.id !== id); commit(); },

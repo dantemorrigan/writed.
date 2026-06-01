@@ -44,14 +44,74 @@ function ConfirmDelete({ title, what, onConfirm, onCancel }) {
   );
 }
 
+/* ---- Sort options + helper ---- */
+const SORTS = [
+  ["created_desc", "Сначала новые"],
+  ["created_asc",  "Сначала старые"],
+  ["updated_desc", "Недавно изменённые"],
+  ["title_asc",    "По названию · А–Я"],
+];
+function sortItems(arr, sort) {
+  const c = (x) => x.createdAt || x.updatedAt || 0;
+  const u = (x) => x.updatedAt || x.createdAt || 0;
+  const out = arr.slice();
+  switch (sort) {
+    case "created_asc":  out.sort((a, b) => c(a) - c(b)); break;
+    case "updated_desc": out.sort((a, b) => u(b) - u(a)); break;
+    case "title_asc":    out.sort((a, b) => (a.title || "").localeCompare(b.title || "", "ru")); break;
+    case "created_desc":
+    default:             out.sort((a, b) => c(b) - c(a)); break;
+  }
+  return out;
+}
+
+/* ---- Sort dropdown menu ---- */
+function SortMenu({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const cur = SORTS.find((s) => s[0] === value) || SORTS[0];
+  return (
+    <div className="sortmenu">
+      <button className={"sortmenu-btn" + (open ? " on" : "")} onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox" aria-expanded={open} title="Сортировка">
+        <Icon name="sort" size={15} />
+        <span className="sortmenu-cur">{cur[1]}</span>
+        <Icon name="chevron" size={13} className={"sortmenu-chev" + (open ? " open" : "")} />
+      </button>
+      {open && (
+        <React.Fragment>
+          <div className="sortmenu-scrim" onClick={() => setOpen(false)} />
+          <div className="sortmenu-pop" role="listbox">
+            <div className="sortmenu-pop-h mono">Сортировать</div>
+            {SORTS.map(([k, l]) => (
+              <button key={k} role="option" aria-selected={value === k}
+                className={"sortmenu-opt" + (value === k ? " on" : "")}
+                onClick={() => { onChange(k); setOpen(false); }}>
+                <span>{l}</span>
+                {value === k && <Icon name="check" size={14} />}
+              </button>
+            ))}
+          </div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
 function Dashboard({ store, user, nav, onTheme }) {
-  const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sort, setSort] = useState("created_desc");
   const [deleteTarget, setDeleteTarget] = useState(null); // {kind, id, title}
   const s = store.get();
   const stats = store.stats();
 
-  const projects = s.projects.filter((p) => filter === "all" ? true : p.status === (filter === "done" ? "done" : "draft"));
-  const notes = filter === "done" ? [] : s.notes;
+  const showProjects = typeFilter !== "notes";
+  const showNotes = typeFilter !== "projects";
+
+  let projects = s.projects.filter((p) => statusFilter === "all" ? true : p.status === (statusFilter === "done" ? "done" : "draft"));
+  let notes = statusFilter === "done" ? [] : s.notes;
+  projects = showProjects ? sortItems(projects, sort) : [];
+  notes = showNotes ? sortItems(notes, sort) : [];
 
   const hour = new Date().getHours();
   const greet = hour < 5 ? "Доброй ночи" : hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
@@ -94,11 +154,25 @@ function Dashboard({ store, user, nav, onTheme }) {
           </div>
 
           <div className="dash-filter">
-            <div className="seg">
-              {[["all","Всё"],["draft","Черновики"],["done","Завершённые"]].map(([k,l]) => (
-                <button key={k} className={"seg-btn" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>{l}</button>
-              ))}
+            <div className="dash-filter-segs">
+              <div className="filtergrp">
+                <span className="filtergrp-l mono">тип</span>
+                <div className="seg seg--sm" role="group" aria-label="Тип">
+                  {[["all","Всё"],["projects","Проекты"],["notes","Заметки"]].map(([k,l]) => (
+                    <button key={k} className={"seg-btn" + (typeFilter === k ? " on" : "")} onClick={() => setTypeFilter(k)}>{l}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="filtergrp">
+                <span className="filtergrp-l mono">статус</span>
+                <div className="seg seg--sm" role="group" aria-label="Статус">
+                  {[["all","Все"],["draft","Черновики"],["done","Завершённые"]].map(([k,l]) => (
+                    <button key={k} className={"seg-btn" + (statusFilter === k ? " on" : "")} onClick={() => setStatusFilter(k)}>{l}</button>
+                  ))}
+                </div>
+              </div>
             </div>
+            <SortMenu value={sort} onChange={setSort} />
           </div>
 
           {projects.length > 0 && (
