@@ -71,7 +71,7 @@ function buildBookHTML(project, opts) {
   <style>
     @page { margin: ${MARGINS[opts.margin]}; }
     * { box-sizing: border-box; }
-    body { font-family: ${fontStack}; font-size: 12pt; line-height: ${opts.leading}; color: #1f1d18; background: #fff; margin: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    body { font-family: ${fontStack}; font-size: 12pt; line-height: ${opts.leading}; color: #1f1d18; background: #fff; margin: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-wrap: break-word; word-break: break-word; }
     .b-kicker { font-family: 'JetBrains Mono', monospace; letter-spacing: .42em; font-size: 9pt; color: #c2542f; text-transform: uppercase; }
     .b-title h1 { font-size: 30pt; line-height: 1.06; margin: 18px 0 16px; font-weight: 600; letter-spacing: -.015em; }
     .b-syn { font-style: italic; color: #6b6457; font-size: 13pt; margin: 0 auto; max-width: 30em; }
