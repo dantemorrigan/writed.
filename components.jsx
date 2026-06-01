@@ -65,12 +65,64 @@ function Icon({ name, size = 20, style, className }) {
 }
 
 /* ---------- logo with the living dot ---------- */
-function Logo({ size = 22, alive = false, onClick, style }) {
+function Logo({ size = 22, alive = false, onClick, onDotClick, style }) {
   return (
     <span className={"brand" + (alive ? " alive" : "")} onClick={onClick}
       style={{ fontSize: size, cursor: onClick ? "pointer" : "default", ...style }}>
-      Writed<span className="dot" />
+      Writed<span className="dot"
+        onClick={onDotClick ? (e) => { e.stopPropagation(); onDotClick(e); } : undefined}
+        style={onDotClick ? { cursor: "pointer" } : undefined}
+      />
     </span>
+  );
+}
+
+/* ---------- stats popup off the dot ---------- */
+function StatNum({ n, l }) {
+  return (
+    <div className="stats-popup-item">
+      <div className="stats-popup-n mono">{n}</div>
+      <div className="stats-popup-l mono">{l}</div>
+    </div>
+  );
+}
+
+function StatsDot({ store, nav }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const stats = store.stats();
+
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [open]);
+
+  return (
+    <div className="stats-dot-wrap" ref={wrapRef}>
+      <Logo size={19} alive
+        onClick={() => { setOpen(false); nav.dashboard(); }}
+        onDotClick={() => setOpen((o) => !o)}
+      />
+      {open && (
+        <div className="stats-popup">
+          <div className="stats-popup-label mono">написано</div>
+          <div className="stats-popup-grid">
+            <StatNum n={stats.words.toLocaleString("ru-RU")} l="слов" />
+            <StatNum n={stats.projects} l={plural(stats.projects, "проект", "проекта", "проектов")} />
+            <StatNum n={stats.chapters} l={plural(stats.chapters, "глава", "глав", "глав")} />
+            <StatNum n={stats.notes} l={plural(stats.notes, "заметка", "заметок", "заметок")} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -127,5 +179,5 @@ function useToast() {
 const FONT_LABEL = { book: "Newsreader", article: "Spectral", mono: "JetBrains Mono" };
 
 Object.assign(window, {
-  useStore, Icon, ICONS, Logo, ThemeToggle, timeAgo, plural, wordsLabel, useToast, FONT_LABEL,
+  useStore, Icon, ICONS, Logo, StatsDot, ThemeToggle, timeAgo, plural, wordsLabel, useToast, FONT_LABEL,
 });
