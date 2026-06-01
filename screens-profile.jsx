@@ -6,6 +6,27 @@ function Profile({ store, user, nav, onTheme, onToast }) {
   const [name, setName] = useState(user.name);
   const [confirmReset, setConfirmReset] = useState(false);
   const fileRef = useRef(null);
+  const avatarRef = useRef(null);
+
+  function onAvatarChange(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const img = new Image();
+    const url = URL.createObjectURL(f);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxSize = 400;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      store.setUser({ avatar: canvas.toDataURL("image/jpeg", 0.88) });
+      onToast("Фото обновлено");
+    };
+    img.src = url;
+    e.target.value = "";
+  }
 
   function saveName() { const v = name.trim() || "Автор"; store.setUser({ name: v }); onToast("Имя сохранено"); }
   function exportBackup() {
@@ -37,7 +58,14 @@ function Profile({ store, user, nav, onTheme, onToast }) {
           <button className="backlink mono" onClick={() => nav.dashboard()}><Icon name="back" size={14} /> на главную</button>
 
           <section className="prof-hero">
-            <div className="prof-ava mono">{(user.name||"А").trim().charAt(0).toUpperCase()}</div>
+            <button className="prof-ava-wrap" onClick={() => avatarRef.current.click()} title="Загрузить фото">
+              {user.avatar
+                ? <img src={user.avatar} alt="Аватар" className="prof-ava-img" />
+                : <span className="prof-ava mono">{(user.name||"А").trim().charAt(0).toUpperCase()}</span>
+              }
+              <span className="prof-ava-overlay"><Icon name="upload" size={20} /></span>
+              <input ref={avatarRef} type="file" accept="image/*" style={{display:"none"}} onChange={onAvatarChange} />
+            </button>
             <div>
               <div className="eyebrow">Профиль</div>
               <h1 className="prof-name">{user.name || "Автор"}</h1>
@@ -70,17 +98,6 @@ function Profile({ store, user, nav, onTheme, onToast }) {
               <div className="seg seg--sm">
                 <button className={"seg-btn"+(user.theme==="light"?" on":"")} onClick={()=>onTheme("light")}><Icon name="sun" size={14}/> Светлая</button>
                 <button className={"seg-btn"+(user.theme==="dark"?" on":"")} onClick={()=>onTheme("dark")}><Icon name="moon" size={14}/> Тёмная</button>
-              </div>
-            </div>
-          </div>
-
-          <div className="prof-set">
-            <span className="prof-set-l">Шрифт редактора</span>
-            <div className="prof-set-c">
-              <div className="seg seg--sm">
-                {["book","article","mono"].map((f) => (
-                  <button key={f} className={"seg-btn"+(user.editorFont===f?" on":"")} onClick={()=>store.setUser({editorFont:f})}>{FONT_LABEL[f]}</button>
-                ))}
               </div>
             </div>
           </div>

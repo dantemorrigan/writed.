@@ -12,7 +12,12 @@ function TopBar({ user, nav, onTheme, right }) {
       <div className="topbar-r">
         {right}
         <button className="user-chip" onClick={() => nav.profile()} title="Профиль">
-          <span className="user-ava mono">{(user.name || "А").trim().charAt(0).toUpperCase()}</span>
+          <span className="user-ava mono">
+            {user.avatar
+              ? <img src={user.avatar} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} />
+              : (user.name || "А").trim().charAt(0).toUpperCase()
+            }
+          </span>
           <span className="user-name">{user.name || "Автор"}</span>
         </button>
         <ThemeToggle theme={user.theme} onChange={onTheme} />

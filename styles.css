@@ -194,9 +194,11 @@ body::before {
 }
 @keyframes splashFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* ---- Custom cursor ---- */
-body { cursor: none; }
-button, a, [role="button"], input, textarea, select, label { cursor: none; }
+/* ---- Custom cursor (desktop only) ---- */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
+  button, a, [role="button"], input, textarea, select, label { cursor: none; }
+}
 
 .cursor-dot {
   position: fixed; z-index: 10000; pointer-events: none;
@@ -218,6 +220,10 @@ button, a, [role="button"], input, textarea, select, label { cursor: none; }
   transform: translate(-50%, -50%);
   transition: width .3s var(--ease), height .3s var(--ease), opacity .3s var(--ease), border-color .2s var(--ease);
   will-change: transform;
+}
+
+@media (hover: none) {
+  .cursor-dot, .cursor-ring { display: none; }
 }
 
 /* hover state — ring expands, dot shrinks */

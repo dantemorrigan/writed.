@@ -150,6 +150,8 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
     { g: [["quote","quote"],["ul","ul"],["ol","ol"],["hr","hr"]] },
   ];
 
+  const FONT_MAP_FAMILY = { book: "var(--book)", article: "var(--book-alt)", mono: "var(--mono)" };
+
   return (
     <div className={"editor-root" + (focusMode ? " focus" : "")}>
       <header className="ed-head">
@@ -198,6 +200,16 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
                 ))}
               </div>
             ))}
+            <div className="ed-tools-grp ed-tools-fonts">
+              {["book","article","mono"].map((f) => (
+                <button key={f} className={"tool tool--font" + (user.editorFont===f?" on":"")}
+                  title={FONT_LABEL[f]}
+                  style={{ fontFamily: FONT_MAP_FAMILY[f], fontSize: 13, letterSpacing: f==="mono"?"-0.03em":"0.01em" }}
+                  onMouseDown={(e) => { e.preventDefault(); store.setUser({ editorFont: f }); }}>
+                  Aa
+                </button>
+              ))}
+            </div>
             <div className="ed-tools-grp ed-tools-modes">
               <button className={"tool" + (focusMode?" on":"")} title="Фокус" onClick={() => setFocusMode((f)=>!f)}><Icon name="focus" size={19} /></button>
             </div>
