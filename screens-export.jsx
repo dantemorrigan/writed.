@@ -90,8 +90,8 @@ function buildBookHTML(project, opts) {
     @media screen {
       body { padding: 60px 0 80px; }
       body > section { max-width: 34em; margin: 0 auto; padding: 0 ${SCREEN_PADS[opts.margin]}; }
-      .b-title { text-align: center; padding-bottom: 46px; margin-bottom: 46px; border-bottom: 1px solid #e9e3d5; }
-      .b-toc { padding-bottom: 40px; margin-bottom: 40px; border-bottom: 1px solid #e9e3d5; }
+      .b-title { text-align: center; padding-bottom: 46px; margin-bottom: 46px; border-bottom: ${opts.merge ? "none" : "1px solid #e9e3d5"}; }
+      .b-toc { padding-bottom: 40px; margin-bottom: ${opts.merge ? "24px" : "40px"}; border-bottom: ${opts.merge ? "none" : "1px solid #e9e3d5"}; }
       .b-chap + .b-chap { margin-top: ${opts.merge ? "0" : "44px"}; }
       .b-chap h1 { padding-top: ${opts.merge ? "0" : "26px"}; }
       .b-chap:first-of-type h1 { padding-top: 0; }
@@ -178,7 +178,7 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
 
             <div className="exp-grp">
               <div className="exp-grp-h mono">Структура</div>
-              {[["titlePage","Титульный лист"],["toc","Оглавление"],["merge","Объединить главы без разрывов"]].map(([k,l]) => (
+              {[["titlePage","Титульный лист"],["toc","Оглавление"],["merge","Убрать разделители между главами"]].map(([k,l]) => (
                 <label key={k} className="exp-toggle">
                   <span className={"switch" + (opts[k] ? " on" : "")} onClick={() => set({ [k]: !opts[k] })}><span /></span>
                   {l}
