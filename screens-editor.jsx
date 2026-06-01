@@ -17,7 +17,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   const ref = useRef(null);
   const scrollRef = useRef(null);
   const saved = useRef(null);
-  const [panel, setPanel] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
   const [mode, setMode] = useState("edit");
   const [edition] = useState("novel");
@@ -149,7 +148,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
   ];
 
   return (
-    <div className={"editor-root" + (focusMode ? " focus" : "") + (panel ? "" : " nopanel")}>
+    <div className={"editor-root" + (focusMode ? " focus" : "")}>
       <header className="ed-head">
         <div className="ed-head-l">
           <button className="icon-btn" onClick={() => project ? nav.project(project.id) : nav.dashboard()} title="Назад"><Icon name="back" size={18} /></button>
@@ -174,7 +173,6 @@ function Editor({ store, user, nav, onTheme, docId, apiRef }) {
           {project && <button className="icon-btn" onClick={() => nav.export(project.id)} title="Экспорт книги"><Icon name="export" size={18} /></button>}
           <button className="icon-btn icon-btn--danger" onClick={() => setConfirmDelete(true)} title="Удалить документ"><Icon name="trash" size={18} /></button>
           <ThemeToggle theme={user.theme} onChange={onTheme} />
-          <button className={"icon-btn" + (panel?" active":"")} onClick={() => setPanel((p) => !p)} title="Панель инструментов"><Icon name="panel" size={18} /></button>
         </div>
       </header>
 
