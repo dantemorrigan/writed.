@@ -102,6 +102,15 @@ function Profile({ store, user, nav, onTheme, onToast }) {
             </div>
           </div>
 
+          <div className="prof-set">
+            <span className="prof-set-l">Знакомство</span>
+            <div className="prof-set-c">
+              <button className="btn btn--ghost" onClick={() => { store.replayTour(); nav.dashboard(); }}>
+                <Icon name="eye" size={16}/> Повторить тур
+              </button>
+            </div>
+          </div>
+
           <div className="section-head"><span className="eyebrow">Данные</span><span className="rule-thin section-rule" /></div>
           <p className="prof-note mono">Всё хранится только на этом устройстве. Сделайте резервную копию, чтобы не потерять написанное.</p>
           <div className="prof-data">

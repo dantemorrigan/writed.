@@ -147,6 +147,9 @@ function App() {
       {screen}
       {exportFor && <ExportModal store={store} projectId={exportFor.pid} initialFormat={exportFor.fmt}
         onClose={() => setExportFor(null)} onToast={toast} />}
+      {s.onboarded && !s.tourDone && route.name !== "profile" && (
+        <Tour store={store} nav={nav} onFinish={() => store.completeTour()} />
+      )}
       {toastNode}
     </>
   );

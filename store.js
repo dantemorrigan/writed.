@@ -83,6 +83,10 @@
     },
     setUser(patch) { state.user = { ...state.user, ...patch }; commit(); },
 
+    /* ---- guided tour ---- */
+    completeTour() { state.tourDone = true; commit(); },
+    replayTour() { state.tourDone = false; commit(); },
+
     /* ---- projects ---- */
     createProject(title) {
       const p = { id: uid("p_"), title: title || "Без названия", status: "draft",
