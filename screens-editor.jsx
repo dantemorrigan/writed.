@@ -254,7 +254,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
           <div className="sheet" style={{ "--ed-font": editorFontVar }}>
             <div className="sheet-edge" />
             <div ref={ref} className="ed-area" contentEditable suppressContentEditableWarning
-              spellCheck={true}
+              spellCheck={true} data-placeholder={tl("editor_placeholder")}
               onInput={onInput} onKeyUp={refreshActive}
               onMouseUp={refreshActive} onFocus={refreshActive} />
           </div>

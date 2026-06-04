@@ -88,10 +88,12 @@ function StatNum({ n, l }) {
   );
 }
 
-function StatsDot({ store, nav }) {
+function StatsDot({ store, nav, lang }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const stats = store.stats();
+  const tl = T(lang || "en");
+  const locale = lang === "ru" ? "ru-RU" : "en-US";
 
   useEffect(() => {
     if (!open) return;
@@ -114,12 +116,12 @@ function StatsDot({ store, nav }) {
       />
       {open && (
         <div className="stats-popup">
-          <div className="stats-popup-label mono">написано</div>
+          <div className="stats-popup-label mono">{tl("words_written")}</div>
           <div className="stats-popup-grid">
-            <StatNum n={stats.words.toLocaleString("ru-RU")} l="слов" />
-            <StatNum n={stats.projects} l={plural(stats.projects, "проект", "проекта", "проектов")} />
-            <StatNum n={stats.chapters} l={plural(stats.chapters, "глава", "глав", "глав")} />
-            <StatNum n={stats.notes} l={plural(stats.notes, "заметка", "заметок", "заметок")} />
+            <StatNum n={stats.words.toLocaleString(locale)} l={pluralT(stats.words, lang || "en", "word_one", "word_few", "word_many")} />
+            <StatNum n={stats.projects} l={pluralT(stats.projects, lang || "en", "proj_one", "proj_few", "proj_many")} />
+            <StatNum n={stats.chapters} l={pluralT(stats.chapters, lang || "en", "chap_one", "chap_few", "chap_many")} />
+            <StatNum n={stats.notes} l={pluralT(stats.notes, lang || "en", "note_one", "note_few", "note_many")} />
           </div>
         </div>
       )}

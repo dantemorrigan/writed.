@@ -139,7 +139,7 @@ function buildBookHTML(project, opts) {
     body += `<section class="b-title"><div class="b-kicker">WRITED.</div><h1>${project.title}</h1>${project.synopsis ? `<p class="b-syn">${project.synopsis}</p>` : ""}</section>`;
   }
   if (opts.toc) {
-    body += `<section class="b-toc"><h2>Содержание</h2><ol>${chapters.map((c) => `<li><span>${c.title}</span></li>`).join("")}</ol></section>`;
+    body += `<section class="b-toc"><h2>${t("toc_title", opts.lang || "ru")}</h2><ol>${chapters.map((c) => `<li><span>${c.title}</span></li>`).join("")}</ol></section>`;
   }
   chapters.forEach((c, i) => {
     body += `<section class="b-chap${opts.merge ? " merged" : ""}">${c.content || ""}</section>`;
@@ -201,7 +201,7 @@ function ExportModal({ store, projectId, onClose, initialFormat, onToast }) {
   const [opts, setOpts] = useState(() => ({
     merge: false, titlePage: true, toc: true,
     margin: "normal", font: "book", leading: 1.7,
-    paperSize: "a4",
+    paperSize: "a4", lang,
     include: {},
   }));
   const set = (patch) => setOpts((o) => ({ ...o, ...patch }));

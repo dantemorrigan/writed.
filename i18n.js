@@ -14,6 +14,7 @@
       /* ---- words ---- */
       word_one: "слово", word_few: "слова", word_many: "слов",
       words_written: "написано",
+      editor_placeholder: "Пишите…",
 
       /* ---- plurals (project / chapter / note) ---- */
       proj_one: "проект", proj_few: "проекта", proj_many: "проектов",
@@ -258,6 +259,7 @@
       /* ---- words ---- */
       word_one: "word", word_few: "words", word_many: "words",
       words_written: "written",
+      editor_placeholder: "Write…",
 
       /* ---- plurals ---- */
       proj_one: "project", proj_few: "projects", proj_many: "projects",
