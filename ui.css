@@ -190,6 +190,7 @@
 .ed-crumb-doc:hover { color: var(--accent); }
 .ed-rename { font-size: var(--t-md); font-weight: 600; font-family: var(--ui); border: none; border-bottom: 2px solid var(--accent);
   background: transparent; color: var(--ink); outline: none; min-width: 0; width: 100%; max-width: 100%; box-sizing: border-box; }
+.ed-head--renaming .ed-head-r { display: none; }
 .ed-head-r { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .modeswitch { display: inline-flex; border: 1px solid var(--line); margin-right: 4px; }
 .modeswitch-b { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: none;
@@ -351,7 +352,8 @@
 .switch.on span { left: 18px; background: #fff; }
 .exp-row { display: flex; align-items: center; gap: 14px; padding: 9px 0; min-width: 0; }
 .exp-lbl { font-size: var(--t-sm); color: var(--ink-2); min-width: 92px; flex-shrink: 0; }
-.exp-row .seg { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; flex-shrink: 1; min-width: 0; scrollbar-width: none; }
+.exp-row .seg { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; flex-shrink: 1; min-width: 0; scrollbar-width: none; }
 .exp-row .seg::-webkit-scrollbar { display: none; }
 .exp-row .seg-btn { flex-shrink: 0; }
 .exp-range { flex: 1; accent-color: var(--accent); }
@@ -573,6 +575,14 @@
   .confirm-modal { padding: 36px 28px 32px; }
   .modal-scrim { padding: 10px 0 0; align-items: flex-end; }
   .export-modal { border-radius: var(--r-xl) var(--r-xl) 0 0; }
+
+  /* export rows: stack label + control vertically so segs get full width to scroll */
+  .exp-row { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 0; }
+  .exp-lbl { min-width: auto; }
+  .exp-row .seg { width: 100%; }
+  .exp-row .exp-range { width: 100%; }
+  .exp-actions { padding: 14px 18px; gap: 6px; }
+  .exp-actions .btn { flex: 1; justify-content: center; font-size: var(--t-xs); padding: 10px 6px; }
 
   /* profile */
   .prof-stats { grid-template-columns: 1fr 1fr; }

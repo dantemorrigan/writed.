@@ -170,7 +170,7 @@ function Editor({ store, user, nav, onTheme, docId, apiRef, onToast }) {
 
   return (
     <div className={"editor-root" + (focusMode ? " focus" : "")}>
-      <header className="ed-head">
+      <header className={"ed-head" + (renaming ? " ed-head--renaming" : "")}>
         <div className="ed-head-l">
           <button className="icon-btn" onClick={() => project ? nav.project(project.id) : nav.dashboard()} title={tl("ed_back")}><Icon name="back" size={18} /></button>
           <div className="ed-crumb">
